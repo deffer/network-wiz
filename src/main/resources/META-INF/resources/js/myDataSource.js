@@ -5,7 +5,7 @@ angular.module("datasource", []).factory("datasource", [function(){
 	var service = {};
 
 	service.getNode = function(){
-		var network = {
+		var node1 = {
 			"system": {
 				"name": "EPR",
 				"entities": [
@@ -73,7 +73,9 @@ angular.module("datasource", []).factory("datasource", [function(){
 				]
 			}
 		};
-		return network;
+
+		//  var newObject = jQuery.extend(true, {}, oldObject);
+		return node1;
 	};
 
 	service.generateGraph = function(myNodes, myEdges){

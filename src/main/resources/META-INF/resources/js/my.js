@@ -3,7 +3,7 @@
  */
 
 (function($){
-
+   // if we need something here
 })(this.jQuery);
 
 angular.module("nwizApp", ["datasource"]);
@@ -23,4 +23,8 @@ var nwizController = ["$scope", "datasource", function($scope, datasource){
 
 	$scope.cy = cyEl.cytoscape('get');
 
+	$scope.toggleStatus = function(){
+		console.log("Toggling status");
+		$scope.cy.nodes("[faveColor='red']").data("faveColor", "#F5A45D");
+	};
 }];

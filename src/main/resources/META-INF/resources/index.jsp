@@ -56,7 +56,7 @@
 
 <body ng-app="nwizApp" ng-controller="nwizController">
 
-<div><a id = "thelink" ng-click="someHide = !someHide">Toggle</a> </div>
+<div><a id = "thelink" ng-click="toggleStatus()">Toggle</a> </div>
 
 <div id="cys" class="square-box">
     <div id="hcy" ng-hide="someHide" class='square-content'>
