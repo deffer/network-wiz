@@ -81,18 +81,23 @@ angular.module("datasource", []).factory("datasource", [function(){
 	service.generateGraph = function(myNodes, myEdges){
 		var network = service.getNode();
 
-		myNodes.push( {data: {id: 'system', weight: 75, faveColor: '#86B342', faveShape: 'octagon', 'font-size': 11, name: network.system.name}});
+		var column2 = 3;
+		var column3 = 0;
+		var column4 = 0;
+		myNodes.push( {data: {id: 'system', weight: 75, strength:7, faveColor: '#86B342', faveShape: 'octagon', 'font-size': 11, name: network.system.name, serviceLevel:1, serviceOrder:3}});
 		for(var cEntities = 0; cEntities < network.system.entities.length; cEntities ++) {
 			var entity = network.system.entities[cEntities];
-			myNodes.push( {data: {id: entity.name, weight: 55, faveColor: '#EDA1ED', faveShape: 'ellipse', name: entity.name}});
+			myNodes.push( {data: {id: entity.name, weight: 55, strength:5, faveColor: '#EDA1ED', faveShape: 'ellipse', name: entity.name, serviceLevel:2, serviceOrder:column2++}});
 			myEdges.push( { data: { source: 'system', target: entity.name, faveColor: '#EDA1ED', strength: 90 } } );
 			for(var aCount = 0; aCount < entity.applications.length; aCount ++) {
 				var application = entity.applications[aCount];
-				myNodes.push({data: {id: application.name, weight: 35, faveColor: application.status === 'stopped' ? 'red' : '#F5A45D', faveShape: 'rectangle', name: application.name}});
+				myNodes.push({data: {id: application.name, weight: 35, strength:3,  faveColor: application.status === 'stopped' ? 'red' : '#F5A45D',
+					faveShape: 'rectangle', name: application.name, serviceLevel:3, serviceOrder:column3++}});
 				myEdges.push({ data: { source: entity.name, target: application.name, faveColor: '#F5A45D', strength: 90 }});
 				for(var sCount = 0; sCount < application.subscribers.length; sCount ++) {
 					var subscriber = application.subscribers[sCount];
-					myNodes.push({data: {id: subscriber.name, weight: 15, faveColor: '#6FB1FC', faveShape: 'triangle', name: subscriber.name}});
+					myNodes.push({data: {id: subscriber.name, weight: 15, strength:1, faveColor: '#6FB1FC',
+						faveShape: 'triangle', name: subscriber.name, serviceLevel:4, serviceOrder:column4++}});
 					myEdges.push({ data: { source: application.name, target: subscriber.name, faveColor: '#6FB1FC', strength: 90 }});
 				}
 			}
@@ -101,41 +106,26 @@ angular.module("datasource", []).factory("datasource", [function(){
 
 	service.getGraphOptions = function(myNodes, myEdges, onReadyFunc){
 		var result = {
-			layout: {
-				name: 'breadthfirst', // 'arbor',
-				directed: true,
+			layout: service.getArborGraphLayout(),
+			/*{
+				name: 'concentric',
+				//directed: true,
 
-				liveUpdate: true, // whether to show the layout as it's running
 				ready: undefined, // callback on layoutready
 				stop: undefined, // callback on layoutstop
-				maxSimulationTime: 4000, // max length in ms to run the layout
-				fit: true, // reset viewport to fit default simulationBounds
-				padding: [ 50, 50, 50, 50 ], // top, right, bottom, left
-				simulationBounds: undefined, // [x1, y1, x2, y2]; [0, 0, width, height] by default
-				ungrabifyWhileSimulating: true, // so you can't drag nodes during layout
-
-				// forces used by arbor (use arbor default on undefined)
-				repulsion: undefined,
-				stiffness: undefined,
-				friction: undefined,
-				gravity: true,
-				fps: undefined,
-				precision: undefined,
-
-				// static numbers or functions that dynamically return what these
-				// values should be for each element
-				nodeMass: undefined,
-				edgeLength: undefined,
-
-				stepSize: 1, // size of timestep in simulation
-
-				// function that returns true if the system is stable to indicate
-				// that the layout can be stopped
-				stableEnergy: function (energy) {
-					var e = energy;
-					return (e.max <= 0.5) || (e.mean <= 0.3);
+				//fit: true, // reset viewport to fit default simulationBounds
+				padding: 10, //[ 50, 50, 50, 50 ], // top, right, bottom, left
+				position: function( node ){
+					var row = 0+node.data("serviceOrder");
+					var col = 0+node.data("serviceLevel");
+					console.log("For "+node.data("name")+"    "+row+":"+col);
+					return {col: col, row: row}
+				},
+				concentric: function(){ // returns numeric value for each node, placing higher nodes in levels towards the centre
+					return 10-this.data("serviceLevel");
 				}
-			},
+				//roots: '#system'
+			},*/
 
 			style: cytoscape.stylesheet()
 				.selector('node')
@@ -186,5 +176,43 @@ angular.module("datasource", []).factory("datasource", [function(){
 
 		return result;
 	};
+
+	service.getArborGraphLayout = function(){
+		return {
+			name: 'arbor',
+
+			liveUpdate: true, // whether to show the layout as it's running
+			ready: undefined, // callback on layoutready
+			stop: undefined, // callback on layoutstop
+			maxSimulationTime: 4000, // max length in ms to run the layout
+			fit: true, // reset viewport to fit default simulationBounds
+			padding: [ 50, 50, 50, 50 ], // top, right, bottom, left
+			simulationBounds: undefined, // [x1, y1, x2, y2]; [0, 0, width, height] by default
+			ungrabifyWhileSimulating: true, // so you can't drag nodes during layout
+
+			// forces used by arbor (use arbor default on undefined)
+			repulsion: undefined,
+			stiffness: undefined,
+			friction: undefined,
+			gravity: true,
+			fps: undefined,
+			precision: undefined,
+
+			// static numbers or functions that dynamically return what these
+			// values should be for each element
+			nodeMass: undefined,
+			edgeLength: undefined,
+
+			stepSize: 1, // size of timestep in simulation
+
+			// function that returns true if the system is stable to indicate
+			// that the layout can be stopped
+			stableEnergy: function (energy) {
+				var e = energy;
+				return (e.max <= 0.5) || (e.mean <= 0.3);
+			}
+		}
+	};
+
 	return service;
 }]);

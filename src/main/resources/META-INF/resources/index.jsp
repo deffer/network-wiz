@@ -20,7 +20,7 @@
         .square-box:before{
             content: "";
             display: block;
-            padding-top: 70%;
+            padding-top: 50%;
         }
         .square-content{
             position:  absolute;
@@ -59,12 +59,10 @@
 <div><a id = "thelink" ng-click="toggleStatus()">Toggle</a> </div>
 
 <div id="cys" class="square-box">
-    <div id="hcy" ng-hide="someHide" class='square-content'>
+    <div id="hcy" class='square-content'>
         <div id="cy"> </div>
     </div>
-    <div id="hcy1" class='square-content'>
-        <div id="cy1"> </div>
-    </div>
+
 </div>
 
 </body>

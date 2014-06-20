@@ -26,5 +26,6 @@ var nwizController = ["$scope", "datasource", function($scope, datasource){
 	$scope.toggleStatus = function(){
 		console.log("Toggling status");
 		$scope.cy.nodes("[faveColor='red']").data("faveColor", "#F5A45D");
+		$scope.cy.nodes("[serviceType='queue']").data("faveColor", "blue");
 	};
 }];
