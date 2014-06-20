@@ -78,8 +78,10 @@ var network = {
             myNodes.push( {data: {id: 'system', weight: 75, faveColor: '#86B342', faveShape: 'octagon', name: network.system.name}});
             for(var cEntities = 0; cEntities < network.system.entities.length; cEntities ++) {
                 var entity = network.system.entities[cEntities];
-                myNodes.push( {data: {id: entity.name, weight: 45, faveColor: '#EDA1ED', faveShape: 'ellipse', name: entity.name}});
-                myEdges.push( { data: { source: 'system', target: entity.name, faveColor: '#EDA1ED', strength: 90 } } );
+
+	            myNodes.push( {data: {id: entity.name, weight: 45, faveColor: '#EDA1ED', faveShape: 'ellipse', name: entity.name}});
+
+	            myEdges.push( { data: { source: 'system', target: entity.name, faveColor: '#EDA1ED', strength: 90 } } );
                 for(var aCount = 0; aCount < entity.applications.length; aCount ++) {
                     var application = entity.applications[aCount];
                     myNodes.push({data: {id: application.name, weight: 35, faveColor: '#F5A45D', faveShape: 'rectangle', name: application.name}});

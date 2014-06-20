@@ -10,7 +10,39 @@
             font: 14px helvetica neue, helvetica, arial, sans-serif;
         }
 
-        #cy {
+
+        .square-box{
+            position: relative;
+            width: 50%;
+            overflow: hidden;
+            /*background: #4679BD;*/
+        }
+        .square-box:before{
+            content: "";
+            display: block;
+            padding-top: 70%;
+        }
+        .square-content{
+            position:  absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            color: white;
+        }
+        .square-content div {
+            display: table;
+            width: 100%;
+            height: 100%;
+        }
+        .square-content span {
+            display: table-cell;
+            text-align: center;
+            vertical-align: middle;
+            color: white
+        }
+
+        #ccy {
             height: 100%;
             width: 100%;
             position: absolute;
@@ -22,192 +54,19 @@
 
 </head>
 
-<body >
-<div id="cy">
+<body ng-app="nwizApp" ng-controller="nwizController">
+
+<div><a id = "thelink" ng-click="someHide = !someHide">Toggle</a> </div>
+
+<div id="cys" class="square-box">
+    <div id="hcy" ng-hide="someHide" class='square-content'>
+        <div id="cy"> </div>
+    </div>
+    <div id="hcy1" class='square-content'>
+        <div id="cy1"> </div>
+    </div>
 </div>
 
-<script type="application/javascript">
-    var network = {
-        "system": {
-            "name": "EPR",
-            "entities": [
-                {
-                    "name": "identity",
-                    "topic": "nz.ac.auckland.jms.identity.person",
-                    "applications":  [
-                        {
-                            "name": "StudentAdminSubscribers",
-                            "status": "running",
-                            "version": "2.15",
-                            "subscribers": [{
-                                    "name": "StudentAdminPerson",
-                                    "context": "StudentAdminPerson",
-                                    "endpoint": "https://esb.dev.mw.auckland.ac.nz/StudentAdmin/StudentAdminService"
-                                }
-                            ]
-                        },
-                        {
-                            "name": "StudentAccommodationSubscribers",
-                            "status": "running",
-                            "version": "2.16",
-                            "subscribers": [{
-                                    "name": "StudentAccommodationPerson",
-                                    "context": "StudentAccommodationPerson",
-                                    "endpoint": "https://ormadmpre01.pre.mw.auckland.ac.nz:8004/StudentAccommodation/StudentAccommodationService"
-                                }
-                            ]
-                        },
-                        {
-                            "name": "FacultyOfEducationSubscribers",
-                            "status": "running",
-                            "version": "1.18",
-                            "subscribers": [
-                                {
-                                    "name": "FedssPerson",
-                                    "context": "FedssPerson",
-                                    "endpoint": "https://esb.dev.mw.auckland.ac.nz/FacultyOfEducation/FedssService"
-                                }]
-                        },
-                        {
-                            "name": "HRSubscribers",
-                            "status": "stopped",
-                            "version": "1.8",
-                            "subscribers": [
-                                    {
-                                        "name": "HREmployee",
-                                        "context": "HREmployee",
-                                        "endpoint": "https://esb.dev.mw.auckland.ac.nz/HR/HRService"
-                                    },
-                                    {
-                                        "name": "HRApplicant",
-                                        "context": "HRApplicant",
-                                        "endpoint": "https://esb.dev.mw.auckland.ac.nz/HR/HRService"
-                                    },
-                                    {
-                                        "name": "UnresolvedVisitor",
-                                        "context": "HREmployee",
-                                        "endpoint": "https://esb.dev.mw.auckland.ac.nz/HR/HRService"
-                                    }
-                                ]
-                        }
-                    ]
-                }
-            ]
-        }
-    };
-
-    var myNodes = [];
-    var myEdges = [];
-
-    myNodes.push( {data: {id: 'system', weight: 75, faveColor: '#86B342', faveShape: 'octagon', 'font-size': 11, name: network.system.name}});
-    for(var cEntities = 0; cEntities < network.system.entities.length; cEntities ++) {
-        var entity = network.system.entities[cEntities];
-        myNodes.push( {data: {id: entity.name, weight: 55, faveColor: '#EDA1ED', faveShape: 'ellipse', name: entity.name}});
-        myEdges.push( { data: { source: 'system', target: entity.name, faveColor: '#EDA1ED', strength: 90 } } );
-        for(var aCount = 0; aCount < entity.applications.length; aCount ++) {
-            var application = entity.applications[aCount];
-            myNodes.push({data: {id: application.name, weight: 35, faveColor: application.status === 'stopped' ? 'red' : '#F5A45D', faveShape: 'rectangle', name: application.name}});
-            myEdges.push({ data: { source: entity.name, target: application.name, faveColor: '#F5A45D', strength: 90 }});
-            for(var sCount = 0; sCount < application.subscribers.length; sCount ++) {
-                var subscriber = application.subscribers[sCount];
-                myNodes.push({data: {id: subscriber.name, weight: 15, faveColor: '#6FB1FC', faveShape: 'triangle', name: subscriber.name}});
-                myEdges.push({ data: { source: application.name, target: subscriber.name, faveColor: '#6FB1FC', strength: 90 }});
-            }
-        }
-    }
-
-
-    $(function(){ // on dom ready
-
-        $('#cy').cytoscape({
-            layout: {
-                name: 'arbor',
-
-                liveUpdate: true, // whether to show the layout as it's running
-                ready: undefined, // callback on layoutready
-                stop: undefined, // callback on layoutstop
-                maxSimulationTime: 4000, // max length in ms to run the layout
-                fit: true, // reset viewport to fit default simulationBounds
-                padding: [ 50, 50, 50, 50 ], // top, right, bottom, left
-                simulationBounds: undefined, // [x1, y1, x2, y2]; [0, 0, width, height] by default
-                ungrabifyWhileSimulating: true, // so you can't drag nodes during layout
-
-                // forces used by arbor (use arbor default on undefined)
-                repulsion: undefined,
-                stiffness: undefined,
-                friction: undefined,
-                gravity: true,
-                fps: undefined,
-                precision: undefined,
-
-                // static numbers or functions that dynamically return what these
-                // values should be for each element
-                nodeMass: undefined,
-                edgeLength: undefined,
-
-                stepSize: 1, // size of timestep in simulation
-
-                // function that returns true if the system is stable to indicate
-                // that the layout can be stopped
-                stableEnergy: function( energy ){
-                    var e = energy;
-                    return (e.max <= 0.5) || (e.mean <= 0.3);
-                }
-            },
-
-            style: cytoscape.stylesheet()
-                    .selector('node')
-                    .css({
-//                        'font-size': 11,
-                        'shape': 'data(faveShape)',
-                        'width': 'mapData(weight, 40, 80, 20, 60)',
-                        'content': 'data(name)',
-                        'text-valign': 'center',
-                        'text-outline-width': 2,
-                        'text-outline-color': 'data(faveColor)',
-                        'background-color': 'data(faveColor)',
-                        'color': '#fff'
-                    })
-                    .selector(':selected')
-                    .css({
-                        'border-width': 3,
-                        'border-color': '#333'
-                    })
-                    .selector('edge')
-                    .css({
-                        'opacity': 0.666,
-                        'width': 'mapData(strength, 70, 100, 2, 6)',
-                        'target-arrow-shape': 'triangle',
-                        'source-arrow-shape': 'circle',
-                        'line-color': 'data(faveColor)',
-                        'source-arrow-color': 'data(faveColor)',
-                        'target-arrow-color': 'data(faveColor)'
-                    })
-                    .selector('edge.questionable')
-                    .css({
-                        'line-style': 'dotted',
-                        'target-arrow-shape': 'diamond'
-                    })
-                    .selector('.faded')
-                    .css({
-                        'opacity': 0.25,
-                        'text-opacity': 0
-                    }),
-
-            elements: {
-                nodes: myNodes,
-                edges: myEdges
-            },
-
-            ready: function(){
-                window.cy = this;
-
-                // giddy up
-            }
-        });
-
-    }); // on dom ready
-</script>
 </body>
 
 </html>
