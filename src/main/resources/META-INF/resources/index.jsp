@@ -42,13 +42,16 @@
             color: white
         }
 
-        #ccy {
+        #cy {
+	        /*margin-top: 100px;*/
+	        margin-left: 100px;
             height: 100%;
-            width: 100%;
+            width: 80%;
             position: absolute;
             left: 0;
-            top: 0;
-            /*background-color: green;*/
+            top: 100px;
+            background-color: lightgrey;
+
         }
     </style>
 
@@ -58,8 +61,8 @@
 
 <div><a id = "thelink" ng-click="toggleStatus()">Toggle</a> </div>
 
-<div id="cys" class="square-box">
-    <div id="hcy" class='square-content'>
+<div id="cys" class="square-box1">
+    <div id="hcy" class='square-content1'>
         <div id="cy"> </div>
     </div>
 

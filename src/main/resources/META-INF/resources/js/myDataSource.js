@@ -4,7 +4,7 @@
 angular.module("datasource", []).factory("datasource", [function(){
 	var service = {};
 
-	service.getNode = function(){
+	service.getNodes = function(){
 		var node1 = {
 			"system": {
 				"name": "EPR",
@@ -74,81 +74,94 @@ angular.module("datasource", []).factory("datasource", [function(){
 			}
 		};
 
-		//  var newObject = jQuery.extend(true, {}, oldObject);
-		return node1;
+		var node2 = $.extend(true, {}, node1);
+		node2.system.entities[0].applications[3].status='running';
+		node2.system.entities[0].applications[0].status='running';
+		node2.system.entities[0].applications[2].status='stopped';
+		return [node1, node2];
 	};
 
-	service.generateGraph = function(myNodes, myEdges){
-		var network = service.getNode();
+	service.colorMap = {1: 'blueviolet', 2: 'blueviolet', 3: "#F5A45D", 4: "#6FB1FC"};
+	service.refreshColor = function(sourceNode, cy){
+		var node = cy.getElementById(sourceNode.name);
+		var color = sourceNode.status == "stopped"?"red":service.colorMap[node.data("serviceLevel")];
+		node.data("faveColor", color);
+	};
 
-		var column2 = 3;
-		var column3 = 0;
-		var column4 = 0;
-		myNodes.push( {data: {id: 'system', weight: 75, strength:7, faveColor: '#86B342', faveShape: 'octagon', 'font-size': 11, name: network.system.name, serviceLevel:1, serviceOrder:3}});
+	service.refreshStatuses = function(cy, network){
 		for(var cEntities = 0; cEntities < network.system.entities.length; cEntities ++) {
 			var entity = network.system.entities[cEntities];
-			myNodes.push( {data: {id: entity.name, weight: 55, strength:5, faveColor: '#EDA1ED', faveShape: 'ellipse', name: entity.name, serviceLevel:2, serviceOrder:column2++}});
-			myEdges.push( { data: { source: 'system', target: entity.name, faveColor: '#EDA1ED', strength: 90 } } );
+			service.refreshColor(entity, cy);
 			for(var aCount = 0; aCount < entity.applications.length; aCount ++) {
 				var application = entity.applications[aCount];
-				myNodes.push({data: {id: application.name, weight: 35, strength:3,  faveColor: application.status === 'stopped' ? 'red' : '#F5A45D',
-					faveShape: 'rectangle', name: application.name, serviceLevel:3, serviceOrder:column3++}});
-				myEdges.push({ data: { source: entity.name, target: application.name, faveColor: '#F5A45D', strength: 90 }});
+				service.refreshColor(application, cy);
 				for(var sCount = 0; sCount < application.subscribers.length; sCount ++) {
 					var subscriber = application.subscribers[sCount];
-					myNodes.push({data: {id: subscriber.name, weight: 15, strength:1, faveColor: '#6FB1FC',
-						faveShape: 'triangle', name: subscriber.name, serviceLevel:4, serviceOrder:column4++}});
-					myEdges.push({ data: { source: application.name, target: subscriber.name, faveColor: '#6FB1FC', strength: 90 }});
+					service.refreshColor(subscriber, cy);
 				}
 			}
 		}
 	};
 
-	service.getGraphOptions = function(myNodes, myEdges, onReadyFunc){
-		var result = {
-			layout: service.getArborGraphLayout(),
-			/*{
-				name: 'concentric',
-				//directed: true,
+	service.generateGraph = function(myNodes, myEdges){
+		var network = service.getNodes()[0];
 
-				ready: undefined, // callback on layoutready
-				stop: undefined, // callback on layoutstop
-				//fit: true, // reset viewport to fit default simulationBounds
-				padding: 10, //[ 50, 50, 50, 50 ], // top, right, bottom, left
-				position: function( node ){
-					var row = 0+node.data("serviceOrder");
-					var col = 0+node.data("serviceLevel");
-					console.log("For "+node.data("name")+"    "+row+":"+col);
-					return {col: col, row: row}
-				},
-				concentric: function(){ // returns numeric value for each node, placing higher nodes in levels towards the centre
-					return 10-this.data("serviceLevel");
+		var column2 = 1;
+		var column3 = 1;
+		var column4 = 1;
+		myNodes.push( {data: {id: 'system', weight: 75, faveColor: 'blueviolet', faveShape: 'octagon',
+			 name: network.system.name, serviceLevel:1, serviceOrder:0}});
+		for(var cEntities = 0; cEntities < network.system.entities.length; cEntities ++) {
+			var entity = network.system.entities[cEntities];
+			myNodes.push( {data: {id: entity.name, weight: 55, faveColor: 'blueviolet', faveShape: 'ellipse',
+				name: entity.name, serviceLevel:2, serviceOrder:column2*10}});
+			myEdges.push( { data: { source: 'system', target: entity.name, faveColor: 'blueviolet', strength: 90 } } );
+			column2 = -column2;
+
+			for(var aCount = 0; aCount < entity.applications.length; aCount ++) {
+				var application = entity.applications[aCount];
+				myNodes.push({data: {id: application.name, weight: 35+aCount, faveColor: application.status === 'stopped' ? 'red' : '#F5A45D',
+					faveShape: 'rectangle', name: application.name, serviceLevel:3, serviceOrder:column3*10}});
+				myEdges.push({ data: { source: entity.name, target: application.name, faveColor: '#F5A45D', strength: 90 }});
+				column3 = -column3;
+
+				for(var sCount = 0; sCount < application.subscribers.length; sCount ++) {
+					var subscriber = application.subscribers[sCount];
+					myNodes.push({data: {id: subscriber.name, weight: 15+sCount*5, faveColor: '#6FB1FC',
+						faveShape: 'triangle', name: subscriber.name, serviceLevel:4, serviceOrder:column4*10}});
+					myEdges.push({ data: { source: application.name, target: subscriber.name, faveColor: '#6FB1FC', strength: 90 }});
+					column4 = -column4;
 				}
-				//roots: '#system'
-			},*/
+			}
+		}
+	};
+
+	service.getGraphOptions = function(myNodes, myEdges, onReadyFunc, onLayoutReadyFunc){
+		var result = {
+			layout:service.getBFLayout(onLayoutReadyFunc),
+			 //service.getArborGraphLayout(),
+
 
 			style: cytoscape.stylesheet()
 				.selector('node')
 				.css({
 //                        'font-size': 11,
 					'shape': 'data(faveShape)',
-					'width': 'mapData(weight, 40, 80, 20, 60)',
+					'width': 'mapData(weight, 10, 80, 20, 60)',
 					'content': 'data(name)',
-					'text-valign': 'center',
-					'text-outline-width': 2,
-					'text-outline-color': 'data(faveColor)',
+					'text-valign': 'bottom',
 					'background-color': 'data(faveColor)',
-					'color': '#fff'
+					'color': 'data(faveColor)'
 				})
 				.selector(':selected')
 				.css({
-					'border-width': 3,
+					'border-width': 2,
 					'border-color': '#333'
 				})
 				.selector('edge')
 				.css({
 					'opacity': 0.666,
-					'width': 'mapData(strength, 70, 100, 2, 6)',
+					'width': 'mapData(strength, 1, 100, 2, 6)',
 					'target-arrow-shape': 'triangle',
 					'source-arrow-shape': 'circle',
 					'line-color': 'data(faveColor)',
@@ -175,6 +188,53 @@ angular.module("datasource", []).factory("datasource", [function(){
 		};
 
 		return result;
+	};
+
+	service.getBFLayout = function(onLayoutReadyFunc){
+		return {
+			name: 'breadthfirst',
+			directed: true,
+			maximalAdjustments: 5,
+			roots: '#system',
+
+			ready: onLayoutReadyFunc,
+			stop: undefined, // callback on layoutstop
+			fit: false, // reset viewport to fit default simulationBounds
+			padding: 10, //[ 50, 50, 50, 50 ], // top, right, bottom, left
+			position: function (node) {
+				var row = 0 + node.data("serviceOrder");
+				var col = 0 + node.data("serviceLevel");
+				console.log("For " + node.data("name") + "    " + row + ":" + col);
+				return {col: col, row: row}
+			},
+			concentric: function () { // returns numeric value for each node, placing higher nodes in levels towards the centre
+				return 10 - this.data("serviceLevel");
+			}
+
+		}
+	};
+
+	service.getConcentricGraphLayout = function(){
+		return {
+			name: 'concentric',
+			directed: true,
+			maximalAdjustments: 5,
+
+			ready: undefined,// onLayoutReadyFunc,
+			stop: undefined, // callback on layoutstop
+			fit: false, // reset viewport to fit default simulationBounds
+			padding: 10, //[ 50, 50, 50, 50 ], // top, right, bottom, left
+			/*position: function (node) {
+				var row = 0 + node.data("serviceOrder");
+				var col = 0 + node.data("serviceLevel");
+				console.log("For " + node.data("name") + "    " + row + ":" + col);
+				return {col: col, row: row}
+			},*/
+			concentric: function () { // returns numeric value for each node, placing higher nodes in levels towards the centre
+				return 10 - this.data("serviceLevel");
+			}
+			//roots: '#system'
+		}
 	};
 
 	service.getArborGraphLayout = function(){

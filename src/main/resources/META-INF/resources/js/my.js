@@ -19,13 +19,26 @@ var nwizController = ["$scope", "datasource", function($scope, datasource){
 		window.globalCy = this;
 	};
 
-	cyEl.cytoscape(datasource.getGraphOptions(myNodes, myEdges, $scope.onCyReady));
+	$scope.onLayoutReady = function(){
+		console.log("Setting positions");
+		var cy = this;
+		cy.nodes("[serviceLevel>2]").each(function(i, node){
+			var vars = node.data("serviceOrder");
+			var y = node.position('y');
+
+			node.position('y', y + vars);
+			console.log("Setting position to "+ (y+ vars));
+		});
+	};
+
+	cyEl.cytoscape(datasource.getGraphOptions(myNodes, myEdges, $scope.onCyReady, $scope.onLayoutReady));
 
 	$scope.cy = cyEl.cytoscape('get');
 
 	$scope.toggleStatus = function(){
 		console.log("Toggling status");
-		$scope.cy.nodes("[faveColor='red']").data("faveColor", "#F5A45D");
-		$scope.cy.nodes("[serviceType='queue']").data("faveColor", "blue");
+		//$scope.cy.nodes("[faveColor='red']").data("faveColor", "#F5A45D");
+		//$scope.cy.nodes("[serviceType='queue']").data("faveColor", "blue");
+		datasource.refreshStatuses($scope.cy, datasource.getNodes()[1]);
 	};
 }];
