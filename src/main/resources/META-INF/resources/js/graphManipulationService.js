@@ -1,13 +1,13 @@
 /**
  * Created by iben883 on 20/06/14.
  */
-angular.module("graphManipulation", []).factory("graphManipulationService", [function(){
+angular.module("graphManipulation", ["dataManipulation"]).factory("graphManipulationService", ["dataManipulationService", function(dms){
 	var service = {};
 
 	service.colorMap = {1: 'lightcoral', 2: 'lightcoral', 3: "#F5A45D", 4: "#6FB1FC"};
 	service.textColorMap = {1: 'darkcoral', 2: 'darkcoral', 3: "#F5A45D", 4: "#6FB1FC"};
 	service.shapesMap = {1: 'octagon', 2: 'ellipse', 3: 'rectangle', 4: 'triangle'};
-	service.colorMapByStatus = {'stopped': 'red', 'not running':'red', 'warning': 'darkred', 'unavailable':'grey'};
+	service.colorMapByStatus = {'stopped': 'darkgrey', 'not running':'darkgrey', 'warning': 'red', 'unavailable':'grey'};
 
 	service.getColor = function (status, level, forText){
 		var color = service.colorMapByStatus[status];
@@ -29,28 +29,44 @@ angular.module("graphManipulation", []).factory("graphManipulationService", [fun
 		return result;
 	};
 
+
 	service.generateNodeData = function(level, name, status, weight, order, id){
 		return $.extend(service.initNodeData(level, name, status, id), {weight:weight, serviceOrder: order});
 	};
 
-	service.refreshColor = function(sourceNode, cy){
+	service.refreshStatusIndication = function(sourceNode, cy){
 		var node = cy.getElementById(sourceNode.name);
 
-		node.data("faveColor", service.getColor(sourceNode.status, node.data("serviceLevel"), false));
-		node.data("textColor", service.getColor(sourceNode.status, node.data("serviceLevel"), true));
+		if (sourceNode.status && sourceNode.status == "warning"){
+			node.removeClass('highlighted');
+			node.data("faveColor", service.getColor(undefined, node.data("serviceLevel"), false));
+			node.data("textColor", service.getColor(undefined, node.data("serviceLevel"), true));
+			node.css('border-width', 4);
+		}else{
+			if (dms.statusIsGoodOrUndefined(sourceNode.status)){
+				node.removeClass('highlighted');
+			}
+			node.css('border-width', 0);
+			node.data("faveColor", service.getColor(sourceNode.status, node.data("serviceLevel"), false));
+			node.data("textColor", service.getColor(sourceNode.status, node.data("serviceLevel"), true));
+
+			if (!dms.statusIsGoodOrUndefined(sourceNode.status)){
+				node.addClass('highlighted');
+			}
+		}
 	};
 
 	service.refreshStatuses = function(cy, network){
-		service.refreshColor(network, cy);
+		service.refreshStatusIndication(network, cy);
 		for(var cEntities = 0; cEntities < network.entities.length; cEntities ++) {
 			var entity = network.entities[cEntities];
-			service.refreshColor(entity, cy);
+			service.refreshStatusIndication(entity, cy);
 			for(var aCount = 0; aCount < entity.applications.length; aCount ++) {
 				var application = entity.applications[aCount];
-				service.refreshColor(application, cy);
+				service.refreshStatusIndication(application, cy);
 				for(var sCount = 0; sCount < application.subscribers.length; sCount ++) {
 					var subscriber = application.subscribers[sCount];
-					service.refreshColor(subscriber, cy);
+					service.refreshStatusIndication(subscriber, cy);
 				}
 			}
 		}
@@ -98,15 +114,21 @@ angular.module("graphManipulation", []).factory("graphManipulationService", [fun
 					'content': 'data(name)',
 					'text-valign': 'bottom',
 					'background-color': 'data(faveColor)',
+					'border-color':'red',
+					'border-width': 0,
 					'color': 'data(textColor)'
 				})
-				.selector(':selected')
-				.css({
+				.selector('.highlighted').css({
+					'background-color': 'darkred',
+					'color': 'darkred',
+					'transition-property': 'background-color, color',
+					'transition-duration': '0.5s'
+				})
+				.selector(':selected').css({
 					'border-width': 2,
 					'border-color': '#333'
 				})
-				.selector('edge')
-				.css({
+				.selector('edge').css({
 					'opacity': 0.666,
 					'width': 'mapData(strength, 1, 100, 2, 6)',
 					'target-arrow-shape': 'triangle',
@@ -115,8 +137,7 @@ angular.module("graphManipulation", []).factory("graphManipulationService", [fun
 					'source-arrow-color': 'data(faveColor)',
 					'target-arrow-color': 'data(faveColor)'
 				})
-				.selector('edge.questionable')
-				.css({
+				.selector('edge.questionable').css({
 					'line-style': 'dotted',
 					'target-arrow-shape': 'diamond'
 				})

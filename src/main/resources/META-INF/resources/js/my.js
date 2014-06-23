@@ -13,21 +13,26 @@ var nwizController = ["$scope", "datasource", "graphManipulationService", "dataM
 	var myNodes = [];
 	var myEdges = [];
 
-	var nodes = datasource.getNodes();
+	var nodes = [];
+	$scope.servernames = ['ormesbdev01', 'ormesbdev02', 'ormesbdev98', 'ormesbdev99'];
 
 	datasource.loadNodes().then(function (systems) {
 		console.log("Updating nodes");
 		console.log(systems);
-		nodes[1] = systems[0][0]; // find the one with name EPR
-		nodes[2] = systems[1][0]; // find the one with name EPR
-		nodes[3] = systems[2][0]; // find the one with name EPR
-		nodes[4] = systems[3][0]; // find the one with name EPR
-		dms.runChaosMonkey(nodes);
+		$scope.systems = dms.groupSystemsByName(systems);
+		console.log($scope.systems);
 
-		nodes[0] = dms.mergeLayers(nodes);
+		dms.runChaosMonkey($scope.systems.EPR);
+		dms.mergeLayers($scope.systems.EPR);
+
+		for (var i = 0; i< $scope.systems.EPR.instances.length; i++){
+			nodes[i] = $scope.systems.EPR.instances[i];
+		}
+
 		gms.generateGraph(nodes[0], myNodes, myEdges);
 		cyEl.cytoscape(gms.getGraphOptions(myNodes, myEdges, $scope.onCyReady, $scope.onLayoutReady));
 		$scope.cy = cyEl.cytoscape('get');
+		gms.refreshStatuses($scope.cy, nodes[0]);
 
 		//console.log(nodes[3]);
 		//bookmarksShuffle.convertFromServer(results, $scope.bookmarkStore);

@@ -67,7 +67,7 @@
 
 <div class="layersNav">
     <a ng-click="toggleLayer(0)">overview</a>
-    <a ng-repeat="i in [1, 2, 3, 4]" ng-click="toggleLayer(i)" ng-class="{hasError: true}">layer {{i}}</a>
+    <a ng-repeat="i in [1, 2, 3, 4]" ng-click="toggleLayer(i)" ng-class="{hasError: true}">{{servernames[i-1]}}</a>
 </div>
 
 <div id="cys" class="square-box1">
