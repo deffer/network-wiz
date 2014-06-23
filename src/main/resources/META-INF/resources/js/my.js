@@ -22,6 +22,7 @@ var nwizController = ["$scope", "datasource", "graphManipulationService", "dataM
 		$scope.systems = dms.groupSystemsByName(systems);
 
 		dms.addMockDataToReport(datasource.getOtherSystemNodes(), $scope.systems);
+		dms.addMockDataToReport(datasource.getAnotherSystemNodes(), $scope.systems);
 
 		console.log($scope.systems);
 

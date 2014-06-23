@@ -46,7 +46,7 @@
 	        /*margin-top: 100px;*/
 	        margin-left: 100px;
             height: 100%;
-            width: 80%;
+            width: 90%;
             position: absolute;
             left: 0;
             top: 100px;

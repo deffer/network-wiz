@@ -5,8 +5,8 @@ angular.module("graphManipulation", ["dataManipulation"]).factory("graphManipula
 	var service = {};
 
 	service.colorMap = {1: 'lightcoral', 2: 'lightcoral', 3: "#F5A45D", 4: "#6FB1FC"};
-	service.textColorMap = {1: 'darkcoral', 2: 'darkcoral', 3: "#F5A45D", 4: "#6FB1FC"};
-	service.shapesMap = {1: undefined, 2: 'ellipse', 3: 'rectangle', 4: 'triangle'};
+	service.textColorMap = {1: 'lightcoral', 2: 'lightcoral', 3: '#F5A45D', 4: '#6FB1FC'};
+	service.shapesMap = {1: 'ellipse', 2: 'roundrectangle', 3: 'roundrectangle', 4: 'ellipse'};
 	service.colorMapByStatus = {'stopped': 'darkgrey', 'not running':'darkgrey', 'warning': 'red', 'unavailable':'grey'};
 
 	service.getColor = function (status, level, forText){
@@ -24,8 +24,8 @@ angular.module("graphManipulation", ["dataManipulation"]).factory("graphManipula
 
 		var result = {id: nodeid, name: name,  serviceLevel:level,
 			faveColor: service.getColor(status, level, false),
-			//faveShape: service.shapesMap[level],
-			faveShape: 'circle',
+			faveShape: service.shapesMap[level],
+			//faveShape: 'roundrectangle',
 			textColor: service.getColor(status, level, true)};
 		return result;
 	};
@@ -102,17 +102,21 @@ angular.module("graphManipulation", ["dataManipulation"]).factory("graphManipula
 
 	service.getGraphOptions = function(myNodes, myEdges, onReadyFunc, onLayoutReadyFunc){
 		var result = {
-			layout:service.getBFLayout(),
-			//service.getArborGraphLayout(),
-			//ervice.getCoSELayout(),
+			layout:
+				//service.getConcentricGraphLayout(),
+			//service.getBFLayout(),
+			service.getArborGraphLayout(),
+			//service.getCoSELayout(),
 
 
 			style: cytoscape.stylesheet()
 				.selector('node')
 				.css({
-//                        'font-size': 11,
+                     'font-size': 11,
+					'font-weight': 'bold',
 					'shape': 'data(faveShape)',
-					/*'width': 'mapData(weight, 10, 80, 20, 60)',*/
+					'width': 'mapData(weight, 0, 100, 20, 60)',
+					'height': 'mapData(weight, 0, 100, 20, 60)',
 					'content': 'data(name)',
 					'text-valign': 'bottom',
 					'background-color': 'data(faveColor)',
@@ -163,17 +167,18 @@ angular.module("graphManipulation", ["dataManipulation"]).factory("graphManipula
 		return {
 			name: 'breadthfirst',
 			directed: true,
+			circle: true,
 			maximalAdjustments: 5,
-			roots: '#EPR,#IDCards',
+			roots: '#EPR,#IDCards,#Voyager',
 
 			ready:  function(){
-				this.nodes().each(function(i, node){
+				/*this.nodes().each(function(i, node){
 					var vars = node.data("serviceOrder");
 					var y = node.position('y');
 
 					node.position('y', y + vars);
 					//console.log("Setting position to "+ (y+ vars));
-				});
+				});*/
 				},
 			stop: undefined, // callback on layoutstop
 			fit: false, // reset viewport to fit default simulationBounds
@@ -190,7 +195,6 @@ angular.module("graphManipulation", ["dataManipulation"]).factory("graphManipula
 	service.getConcentricGraphLayout = function(){
 		return {
 			name: 'concentric',
-			directed: true,
 			maximalAdjustments: 5,
 
 			ready: undefined,// onLayoutReadyFunc,
@@ -206,21 +210,22 @@ angular.module("graphManipulation", ["dataManipulation"]).factory("graphManipula
 	service.getCoSELayout = function(){
 		return {
 			name: 'cose',
-			refresh             : 0, // Number of iterations between consecutive screen positions update (0 -> only updated on the end)
-			fit                 : false,
+			fit : false
+			/*refresh             : 0, // Number of iterations between consecutive screen positions update (0 -> only updated on the end)
+
 			padding             : 10,
 			randomize           : true, // Whether to randomize node positions on the beginning
 			debug               : false,
 			nodeRepulsion       : 10000, // Node repulsion (non overlapping) multiplier
 			nodeOverlap         : 1, // Node repulsion (overlapping) multiplier
 			idealEdgeLength     : 1, // Ideal edge (non nested) length
-			edgeElasticity      : 10, // Divisor to compute edge forces
-			nestingFactor       : 5, // Nesting factor (multiplier) to compute ideal edge length for nested edges
-			gravity             : 5, // Gravity force (constant)
-			numIter             : 10, // Maximum number of iterations to perform
-			initialTemp         : 200, // Initial temperature (maximum node displacement)
+			edgeElasticity      : 200, // Divisor to compute edge forces
+			nestingFactor       : 50, // Nesting factor (multiplier) to compute ideal edge length for nested edges
+			gravity             : 50, // Gravity force (constant)
+			numIter             : 20, // Maximum number of iterations to perform
+			initialTemp         : 100, // Initial temperature (maximum node displacement)
 			coolingFactor       : 0.95, // Cooling factor (how the temperature is reduced between consecutive iterations
-			minTemp             : 1 // Lower temperature threshold (below this point the layout will end)
+			minTemp             : 1 // Lower temperature threshold (below this point the layout will end)*/
 		}
 	};
 
@@ -232,18 +237,18 @@ angular.module("graphManipulation", ["dataManipulation"]).factory("graphManipula
 			ready: undefined, // callback on layoutready
 			stop: undefined, // callback on layoutstop
 			maxSimulationTime: 10000, // max length in ms to run the layout
-			fit: false, // reset viewport to fit default simulationBounds
-			padding: [ 10, 10, 10, 10 ], // top, right, bottom, left
+			fit: true, // reset viewport to fit default simulationBounds
+			padding: [ 100, 100, 100, 100 ], // top, right, bottom, left
 			simulationBounds: undefined, // [x1, y1, x2, y2]; [0, 0, width, height] by default
 			ungrabifyWhileSimulating: true, // so you can't drag nodes during layout
 
 			// forces used by arbor (use arbor default on undefined)
-			repulsion: undefined,
-			stiffness: undefined,
+			repulsion: 10000,
+			stiffness: 700,
 			friction: undefined,
 			gravity: true,
 			fps: undefined,
-			precision: undefined,
+			precision: 150,
 
 			// static numbers or functions that dynamically return what these
 			// values should be for each element

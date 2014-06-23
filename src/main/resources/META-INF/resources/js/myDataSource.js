@@ -190,5 +190,78 @@ angular.module("datasource", []).factory("datasource", ['$http', '$q', function(
 		return [node1, node2, node3, node4];
 	};
 
+	service.getAnotherSystemNodes = function(){
+		var node1 = {
+			"name": "Voyager",
+			"entities": [ {
+				"name": "library",
+				"topic": "nz.ac.auckland.jms.identity.person",
+				"applications":  [{
+					"name": "StudentVjAdminSubscribers",
+					"status": "running",
+					"version": "2.15",
+					"subscribers": [{
+						"name": "StudentAdminVjPerson",
+						"context": "StudentAdminPerson",
+						"endpoint": "https://esb.dev.mw.auckland.ac.nz/StudentAdmin/StudentAdminService"
+					}
+					]
+				},{
+					"name": "StudentVjAccommodationSubscribers",
+					"status": "running",
+					"version": "2.16",
+					"subscribers": [{
+						"name": "StudentAccommodationVjPerson",
+						"context": "StudentAccommodationPerson",
+						"endpoint": "https://ormadmpre01.pre.mw.auckland.ac.nz:8004/StudentAccommodation/StudentAccommodationService"
+					}
+					]
+				},{
+					"name": "FacultyOfEducationVjSubscribers",
+					"status": "running",
+					"version": "1.18",
+					"subscribers": [
+						{
+							"name": "FedssVjPerson",
+							"context": "FedssPerson",
+							"endpoint": "https://esb.dev.mw.auckland.ac.nz/FacultyOfEducation/FedssService"
+						}]
+				},{
+					"name": "HRVjSubscribers",
+					"status": "stopped",
+					"version": "1.8",
+					"subscribers": [{
+						"name": "HRVjEmployee",
+						"context": "HREmployee",
+						"endpoint": "https://esb.dev.mw.auckland.ac.nz/HR/HRService"
+					},{
+						"name": "HRVjApplicant",
+						"context": "HRApplicant",
+						"endpoint": "https://esb.dev.mw.auckland.ac.nz/HR/HRService"
+					},{
+						"name": "VjUnresolvedVisitor",
+						"context": "HREmployee",
+						"endpoint": "https://esb.dev.mw.auckland.ac.nz/HR/HRService"
+					},{
+						"name": "VjResolvedVisitor",
+						"context": "HREmployee",
+						"endpoint": "https://esb.dev.mw.auckland.ac.nz/HR/HRService"
+					}
+					]
+				}
+				]
+			}
+			]
+		};
+
+		var node2 = $.extend(true, {}, node1);
+		node2.entities[0].applications[1].status='running';
+		node2.entities[0].applications[0].status='running';
+		node2.entities[0].applications[3].status='stopped';
+
+		var node3 = $.extend(true, {}, node1);
+		var node4 = $.extend(true, {}, node1);
+		return [node1, node2, node3, node4];
+	};
 	return service;
 }]);
