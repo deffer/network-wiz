@@ -5,6 +5,12 @@ angular.module("dataManipulation", []).factory("dataManipulationService", [funct
 
 	var service = {};
 
+	service.addMockDataToReport = function(nodes, report){
+		for (var i = 0; i<nodes.length; i++){
+			service.addToReport(report, nodes[i], i+1);
+		}
+	};
+
 	/**
 	 * Returns mapping System Name --> list of instances.
 	 * Value in the map is itself a map, as its used in the controller: {instances: [], hasErrors: ?, something: ?}

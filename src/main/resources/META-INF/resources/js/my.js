@@ -20,22 +20,26 @@ var nwizController = ["$scope", "datasource", "graphManipulationService", "dataM
 		console.log("Updating nodes");
 		console.log(systems);
 		$scope.systems = dms.groupSystemsByName(systems);
+
+		dms.addMockDataToReport(datasource.getOtherSystemNodes(), $scope.systems);
+
 		console.log($scope.systems);
 
-		dms.runChaosMonkey($scope.systems.EPR);
-		dms.mergeLayers($scope.systems.EPR);
+		_.each($scope.systems, function(system){
+			dms.runChaosMonkey(system);
+			dms.mergeLayers(system);
+		});
 
-		for (var i = 0; i< $scope.systems.EPR.instances.length; i++){
-			nodes[i] = $scope.systems.EPR.instances[i];
-		}
+		_.each($scope.systems, function(system){
+			gms.generateGraph(system.instances[0], myNodes, myEdges);
+		});
 
-		gms.generateGraph(nodes[0], myNodes, myEdges);
-		cyEl.cytoscape(gms.getGraphOptions(myNodes, myEdges, $scope.onCyReady, $scope.onLayoutReady));
+		cyEl.cytoscape(gms.getGraphOptions(myNodes, myEdges, $scope.onCyReady));
 		$scope.cy = cyEl.cytoscape('get');
-		gms.refreshStatuses($scope.cy, nodes[0]);
 
-		//console.log(nodes[3]);
-		//bookmarksShuffle.convertFromServer(results, $scope.bookmarkStore);
+		_.each($scope.systems, function(system){
+			gms.refreshStatuses($scope.cy, system.instances[0]);
+		});
 	});
 
 
@@ -44,24 +48,12 @@ var nwizController = ["$scope", "datasource", "graphManipulationService", "dataM
 		window.globalCy = this;
 	};
 
-	$scope.onLayoutReady = function(){
-		console.log("Setting positions");
-		var cy = this;
-		cy.nodes().each(function(i, node){
-			var vars = node.data("serviceOrder");
-			var y = node.position('y');
-
-			node.position('y', y + vars);
-			console.log("Setting position to "+ (y+ vars));
-		});
-	};
-
-
 	$scope.toggleLayer = function(layer){
 		console.log("Showing layer "+layer);
-		//$scope.cy.nodes("[faveColor='red']").data("faveColor", "#F5A45D");
-		//$scope.cy.nodes("[serviceType='queue']").data("faveColor", "blue");
-		console.log(nodes[layer]);
-		gms.refreshStatuses($scope.cy, nodes[layer]);
+
+		_.each($scope.systems, function(system){
+			gms.refreshStatuses($scope.cy, system.instances[layer]);
+			console.log( system.instances[layer]);
+		});
 	};
 }];
