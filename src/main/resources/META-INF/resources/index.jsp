@@ -59,6 +59,19 @@
         .layersNav a.hasError {
             color: red;
         }
+
+	    div.dialog {
+		    border-width: 1px;
+		    font-size: 11px;
+		    background: darkgray;
+		    position: absolute;
+		    display: block;
+		    z-index:50;
+		    opacity: 100;
+	    }
+	    div.dialog span {
+		    display: block;
+	    }
     </style>
 
 </head>
@@ -72,6 +85,10 @@
 
 <div id="cys" class="square-box1">
     <div id="hcy" class='square-content1'>
+	    <div class="dialog" ng-show="currentNode">
+		    <span>{{currentNode.name}}:{{currentNode.status}}</span>
+		    <span ng-show="currentNode.endpoint">{{currentNode.endpoint}}</span>
+	    </div>
         <div id="cy"> </div>
     </div>
 

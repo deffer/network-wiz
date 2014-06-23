@@ -16,6 +16,8 @@ var nwizController = ["$scope", "datasource", "graphManipulationService", "dataM
 	var nodes = [];
 	$scope.servernames = ['ormesbdev01', 'ormesbdev02', 'ormesbdev98', 'ormesbdev99'];
 
+	$scope.dialogShow = true;
+
 	datasource.loadNodes().then(function (systems) {
 		console.log("Updating nodes");
 		console.log(systems);
@@ -40,6 +42,16 @@ var nwizController = ["$scope", "datasource", "graphManipulationService", "dataM
 
 		_.each($scope.systems, function(system){
 			gms.refreshStatuses($scope.cy, system.instances[0]);
+		});
+
+		$scope.cy.on('click', 'node', function() {
+			var nodes = this;
+			$scope.currentNode = nodes.data("customData");
+			$scope.dialogShow = true;
+			$(".dialog").css("left", nodes.position("x")+100);
+			$(".dialog").css("top", nodes.position("y")+100);
+			console.log("Node: "+nodes.data("customData").status);
+			$scope.$apply();
 		});
 	});
 

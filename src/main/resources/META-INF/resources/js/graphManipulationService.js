@@ -31,12 +31,13 @@ angular.module("graphManipulation", ["dataManipulation"]).factory("graphManipula
 	};
 
 
-	service.generateNodeData = function(level, name, status, weight, order, id){
-		return $.extend(service.initNodeData(level, name, status, id), {weight:weight, serviceOrder: order});
+	service.generateNodeData = function(level, entry, weight, order, id){
+		return $.extend(service.initNodeData(level, entry.name, entry.status, id), {weight:weight, serviceOrder: order, customData: entry});
 	};
 
 	service.refreshStatusIndication = function(sourceNode, cy){
 		var node = cy.getElementById(sourceNode.name);
+		node.data("customData", sourceNode);
 
 		if (sourceNode.status && sourceNode.status == "warning"){
 			node.removeClass('highlighted');
@@ -77,22 +78,24 @@ angular.module("graphManipulation", ["dataManipulation"]).factory("graphManipula
 		var column2 = -20;
 		var column3 = 0;
 		var column4 = 0;
-		myNodes.push( {data: service.generateNodeData(1, network.name, 'fixed', 90, -30, network.name)});
+		network.status = "fixed";
+		myNodes.push( {data: service.generateNodeData(1, network, 90, -30, network.name)});
 		for(var cEntities = 0; cEntities < network.entities.length; cEntities ++) {
 			var entity = network.entities[cEntities];
-			myNodes.push( {data: service.generateNodeData(2, entity.name, 'fixed', 55, column2)});
+			if (!entity.status) entity.status = "fixed";
+			myNodes.push( {data: service.generateNodeData(2, entity, 25, column2)});
 			myEdges.push( { data: { source: network.name, target: entity.name, faveColor: service.colorMap[2], weight: 10, strength: 90 } } );
 			column2 =  column2==0 ? -20 : 0;
 
 			for(var aCount = 0; aCount < entity.applications.length; aCount ++) {
 				var application = entity.applications[aCount];
-				myNodes.push({data: service.generateNodeData(3, application.name, application.status, 35, column3)});
+				myNodes.push({data: service.generateNodeData(3, application, 35, column3)});
 				myEdges.push({ data: { source: entity.name, target: application.name, faveColor: service.colorMap[3], weight: 20, strength: 90 }});
 				column3 = column3==0 ? -20 : 0;
 
 				for(var sCount = 0; sCount < application.subscribers.length; sCount ++) {
 					var subscriber = application.subscribers[sCount];
-					myNodes.push({data: service.generateNodeData(4, subscriber.name, subscriber.status, 15, column4)});
+					myNodes.push({data: service.generateNodeData(4, subscriber, 15, column4)});
 					myEdges.push({ data: { source: application.name, target: subscriber.name, faveColor: service.colorMap[4], weight:10, strength: 90 }});
 					column4 = column4 ==0? -20 : 0;
 				}
