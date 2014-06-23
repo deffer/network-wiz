@@ -53,13 +53,22 @@
             background-color: lightgrey;
 
         }
+        .layersNav a {
+            display: block;
+        }
+        .layersNav a.hasError {
+            color: red;
+        }
     </style>
 
 </head>
 
 <body ng-app="nwizApp" ng-controller="nwizController">
 
-<div><a id = "thelink" ng-click="toggleStatus()">Toggle</a> </div>
+<div class="layersNav">
+    <a ng-click="toggleLayer(0)">overview</a>
+    <a ng-repeat="i in [1, 2, 3, 4]" ng-click="toggleLayer(i)" ng-class="{hasError: true}">layer {{i}}</a>
+</div>
 
 <div id="cys" class="square-box1">
     <div id="hcy" class='square-content1'>

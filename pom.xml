@@ -49,6 +49,13 @@
 		  <version>1.2.16</version>
 	  </dependency>
 
+	  <dependency>
+		  <groupId>org.webjars</groupId>
+		  <artifactId>underscorejs</artifactId>
+		  <version>1.6.0</version>
+	  </dependency>
+
+
 
 	  <!-- this is to allow us to use tests -->
 	  <dependency>
