@@ -20,18 +20,22 @@ var nwizController = ["$scope", "datasource", "graphManipulationService", "dataM
 
 	datasource.loadNodes().then(function (systems) {
 		console.log("Updating nodes");
-		console.log(systems);
 		$scope.systems = dms.groupSystemsByName(systems);
 
 		dms.addMockDataToReport(datasource.getOtherSystemNodes(), $scope.systems);
 		dms.addMockDataToReport(datasource.getAnotherSystemNodes(), $scope.systems);
 
+		console.log("All systems clear");
 		console.log($scope.systems);
 
+		console.log("Running chaos monkey and merging");
 		_.each($scope.systems, function(system){
 			dms.runChaosMonkey(system);
 			dms.mergeLayers(system);
 		});
+
+		console.log("Graph data ready");
+		console.log($scope.systems);
 
 		_.each($scope.systems, function(system){
 			gms.generateGraph(system.instances[0], myNodes, myEdges);
@@ -77,6 +81,6 @@ var nwizController = ["$scope", "datasource", "graphManipulationService", "dataM
 		});
 
 		$scope.dialogShow = false;
-		$scope.$apply();
+		//$scope.$apply();
 	};
 }];

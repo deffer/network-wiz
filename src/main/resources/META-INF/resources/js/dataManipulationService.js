@@ -49,9 +49,12 @@ angular.module("dataManipulation", []).factory("dataManipulationService", [funct
 
 	service.mergeLayers = function(system){
 		var nodes = system.instances;
-		var result = $.extend(true, {}, nodes[1], nodes[2], nodes[3], nodes[4]);
-		// TODO if some layers are missing a member, need to replace it with unavailable statuse
-		nodes[0] = result;
+
+		nodes[0] = {};
+		for (var i = 1; i<nodes.length; i++){
+			service.extendInstances(nodes[0], nodes[i]);
+		}
+		var result = nodes[0];
 
 		service.mergeLists(result.entities, nodes[1].entities, nodes[2].entities, nodes[3].entities, nodes[4].entities);
 
@@ -75,7 +78,7 @@ angular.module("dataManipulation", []).factory("dataManipulationService", [funct
 			}
 		}
 
-		system.instances[0] = result;
+		//system.instances[0] = result;
 
 		/* network is current system, ex. EPR on one of the servers
 		for(var cEntities = 0; cEntities < network.entities.length; cEntities ++) {
@@ -89,6 +92,52 @@ angular.module("dataManipulation", []).factory("dataManipulationService", [funct
 		}*/
 	};
 
+	service.extendInstances = function(dest, instance){
+		service.extendObjects(dest, instance, 0);
+	};
+
+	service.depthCollectionNames = ['entities', 'applications', 'subscribers'];
+	service.extendObjects = function(dest, other, depth, nameContext){
+		other.id = nameContext? nameContext+'-'+other.name : other.name;
+
+		if (depth>=service.depthCollectionNames.length) {
+			$.extend(dest, other);
+			return;
+		}
+
+		var collectionName = service.depthCollectionNames[depth];
+		var collection = other[collectionName];
+		if (!collection || collection.length == 0){
+			console.log("Empty collection "+collectionName+" on "+ other.id);
+			return;
+		}
+
+		var shallow = _.omit(other, collectionName);
+		$.extend(dest, shallow);
+
+		if (!dest[collectionName]){
+			if (other.id.indexOf("idcardQueue") > 0){
+			 	console.log("Destination collection is undefinded "+collectionName+" on "+ other.id)
+			}
+			dest[collectionName] = [];
+		}else{
+			if (other.id.indexOf("idcardQueue") > 0){
+				console.log("Destination collection "+collectionName+" on "+ other.id+" has size "+dest[collectionName].length) ;
+			}
+		}
+
+		for (var i = 0; i < collection.length; i ++){
+			var entity = collection[i];
+			var partner = _.find(dest[collectionName], function(s){return s.name == entity.name});
+			if (!partner) {
+				/*if (other.id.indexOf("idcardQueue") > 0)
+					console.log("Adding "+other.id+"."+entity.name);*/
+				partner = {};
+				dest[collectionName].push(partner);
+			}
+			service.extendObjects(partner, entity, depth+1, other.id);
+		}
+	};
 
 	service.getOtherApplications = function(otherEntities, aName){
 		var result = [];
@@ -145,7 +194,7 @@ angular.module("dataManipulation", []).factory("dataManipulationService", [funct
 				if (against)
 					return against.status;
 				else
-					return undefined;
+					return "unavailable";
 			});
 
 			masterList[entityIndex].status = service.mergeStatus(statuses);
@@ -155,13 +204,25 @@ angular.module("dataManipulation", []).factory("dataManipulationService", [funct
 	service.mergeStatus = function(statuses){
 		var result = null;
 
+		var hasHealthy = false;
+		var hasFaulty = false;
 		_.each(statuses, function(status){
+			if (service.statusIsGoodOrUndefined(status)){
+				hasHealthy = true;
+			}else{
+				hasFaulty = true;
+				result = status;
+			}
 			if (service.statusIsGoodOrUndefined(result) && !service.statusIsGoodOrUndefined(status)){
 				result = "warning";
 			}
 		});
 
-		return result;
+		if (hasHealthy && hasFaulty)
+			return "warning";
+		else if (hasHealthy)
+			return 'running';
+		else return result;
 	};
 
 	service.statusIsGoodOrUndefined = function(status){

@@ -7,7 +7,7 @@ angular.module("graphManipulation", ["dataManipulation"]).factory("graphManipula
 	service.colorMap = {1: 'orange', 2: 'coral', 3: "olivedrab", 4: "cornflowerblue"};
 	service.textColorMap = {1: 'darkorange', 2: 'chocolate', 3: 'darkolivegreen', 4: 'dodgerblue'};
 	service.shapesMap = {1: 'ellipse', 2: 'roundrectangle', 3: 'roundrectangle', 4: 'ellipse'};
-	service.colorMapByStatus = {'stopped': 'darkgrey', 'not running':'darkgrey', 'warning': 'red', 'unavailable':'grey'};
+	service.colorMapByStatus = {'stopped': 'red', 'not running':'darkgrey', 'warning': 'red', 'unavailable':'darkgrey'};
 
 	service.getColor = function (status, level, forText){
 		var color = service.colorMapByStatus[status];
@@ -49,8 +49,8 @@ angular.module("graphManipulation", ["dataManipulation"]).factory("graphManipula
 				node.removeClass('highlighted');
 			}
 			node.css('border-width', 1);
-			node.data("faveColor", service.getColor(sourceNode.status, node.data("serviceLevel"), false));
-			node.data("textColor", service.getColor(sourceNode.status, node.data("serviceLevel"), true));
+			node.data("faveColor", service.getColor(undefined, node.data("serviceLevel"), false));
+			node.data("textColor", service.getColor(undefined, node.data("serviceLevel"), true));
 
 			if (!dms.statusIsGoodOrUndefined(sourceNode.status)){
 				node.addClass('highlighted');

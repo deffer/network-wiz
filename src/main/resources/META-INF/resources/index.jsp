@@ -65,7 +65,10 @@
         }
         .layersNav a:first-child {
             border-top: black solid 1px;
+	        background-color: white;
         }
+        .layersNav a:nth-child(even) {background-color: beige}
+        .layersNav a:nth-child(odd) {background-color: aliceblue}
         .layersNav a.hasError {
             color: red;
         }
