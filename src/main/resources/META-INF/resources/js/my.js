@@ -16,7 +16,7 @@ var nwizController = ["$scope", "datasource", "graphManipulationService", "dataM
 	var nodes = [];
 	$scope.servernames = ['ormesbdev01', 'ormesbdev02', 'ormesbdev98', 'ormesbdev99'];
 
-	$scope.dialogShow = true;
+	$scope.dialogShow = false;
 
 	datasource.loadNodes().then(function (systems) {
 		console.log("Updating nodes");
@@ -44,14 +44,21 @@ var nwizController = ["$scope", "datasource", "graphManipulationService", "dataM
 			gms.refreshStatuses($scope.cy, system.instances[0]);
 		});
 
-		$scope.cy.on('click', 'node', function() {
+		$scope.cy.on('click', 'node', function(evt) {
 			var nodes = this;
 			$scope.currentNode = nodes.data("customData");
 			$scope.dialogShow = true;
-			$(".dialog").css("left", nodes.position("x")+100);
-			$(".dialog").css("top", nodes.position("y")+100);
-			console.log("Node: "+nodes.data("customData").status);
+			$(".dialog").css("left", evt.cyRenderedPosition.x+100);
+			$(".dialog").css("top", evt.cyRenderedPosition.y+100);
+			console.log(nodes);
 			$scope.$apply();
+		});
+
+		$scope.cy.on('click', function(evt){
+			if (evt.cyTarget === $scope.cy){
+				$scope.dialogShow = false;
+				$scope.$apply();
+			}
 		});
 	});
 
@@ -68,5 +75,8 @@ var nwizController = ["$scope", "datasource", "graphManipulationService", "dataM
 			gms.refreshStatuses($scope.cy, system.instances[layer]);
 			console.log( system.instances[layer]);
 		});
+
+		$scope.dialogShow = false;
+		$scope.$apply();
 	};
 }];

@@ -4,8 +4,8 @@
 angular.module("graphManipulation", ["dataManipulation"]).factory("graphManipulationService", ["dataManipulationService", function(dms){
 	var service = {};
 
-	service.colorMap = {1: 'lightcoral', 2: 'lightcoral', 3: "#F5A45D", 4: "#6FB1FC"};
-	service.textColorMap = {1: 'lightcoral', 2: 'lightcoral', 3: '#F5A45D', 4: '#6FB1FC'};
+	service.colorMap = {1: 'orange', 2: 'coral', 3: "olivedrab", 4: "cornflowerblue"};
+	service.textColorMap = {1: 'darkorange', 2: 'chocolate', 3: 'darkolivegreen', 4: 'dodgerblue'};
 	service.shapesMap = {1: 'ellipse', 2: 'roundrectangle', 3: 'roundrectangle', 4: 'ellipse'};
 	service.colorMapByStatus = {'stopped': 'darkgrey', 'not running':'darkgrey', 'warning': 'red', 'unavailable':'grey'};
 
@@ -42,13 +42,13 @@ angular.module("graphManipulation", ["dataManipulation"]).factory("graphManipula
 		if (sourceNode.status && sourceNode.status == "warning"){
 			node.removeClass('highlighted');
 			node.data("faveColor", service.getColor(undefined, node.data("serviceLevel"), false));
-			node.data("textColor", service.getColor(undefined, node.data("serviceLevel"), true));
-			node.css('border-width', 4);
+			node.data("textColor", service.getColor(sourceNode.status, node.data("serviceLevel"), true));
+			node.css('border-width', 3);
 		}else{
 			if (dms.statusIsGoodOrUndefined(sourceNode.status)){
 				node.removeClass('highlighted');
 			}
-			node.css('border-width', 0);
+			node.css('border-width', 1);
 			node.data("faveColor", service.getColor(sourceNode.status, node.data("serviceLevel"), false));
 			node.data("textColor", service.getColor(sourceNode.status, node.data("serviceLevel"), true));
 
@@ -74,17 +74,17 @@ angular.module("graphManipulation", ["dataManipulation"]).factory("graphManipula
 		}
 	};
 
-	service.generateGraph = function(network, myNodes, myEdges){
+	service.generateGraph = function(system, myNodes, myEdges){
 		var column2 = -20;
 		var column3 = 0;
 		var column4 = 0;
-		network.status = "fixed";
-		myNodes.push( {data: service.generateNodeData(1, network, 90, -30, network.name)});
-		for(var cEntities = 0; cEntities < network.entities.length; cEntities ++) {
-			var entity = network.entities[cEntities];
+		system.status = "fixed";
+		myNodes.push( {data: service.generateNodeData(1, system, 90, -30, system.name)});
+		for(var cEntities = 0; cEntities < system.entities.length; cEntities ++) {
+			var entity = system.entities[cEntities];
 			if (!entity.status) entity.status = "fixed";
 			myNodes.push( {data: service.generateNodeData(2, entity, 25, column2)});
-			myEdges.push( { data: { source: network.name, target: entity.name, faveColor: service.colorMap[2], weight: 10, strength: 90 } } );
+			myEdges.push( { data: { source: system.name, target: entity.name, faveColor: service.colorMap[2], weight: 10, strength: 90 } } );
 			column2 =  column2==0 ? -20 : 0;
 
 			for(var aCount = 0; aCount < entity.applications.length; aCount ++) {
@@ -115,7 +115,7 @@ angular.module("graphManipulation", ["dataManipulation"]).factory("graphManipula
 			style: cytoscape.stylesheet()
 				.selector('node')
 				.css({
-                     'font-size': 11,
+                    'font-size': 11,
 					'font-weight': 'bold',
 					'shape': 'data(faveShape)',
 					'width': 'mapData(weight, 0, 100, 20, 60)',
@@ -123,8 +123,8 @@ angular.module("graphManipulation", ["dataManipulation"]).factory("graphManipula
 					'content': 'data(name)',
 					'text-valign': 'bottom',
 					'background-color': 'data(faveColor)',
-					'border-color':'red',
-					'border-width': 0,
+					'border-color': 'data(textColor)',
+					'border-width': 1,
 					'color': 'data(textColor)'
 				})
 				.selector('.highlighted').css({
@@ -255,10 +255,12 @@ angular.module("graphManipulation", ["dataManipulation"]).factory("graphManipula
 
 			// static numbers or functions that dynamically return what these
 			// values should be for each element
-			nodeMass: undefined,
+			nodeMass: function(data){
+				return 5-data.serviceLevel;
+			},
 			edgeLength: undefined,
 
-			stepSize: 1, // size of timestep in simulation
+			stepSize: 0.15, // size of timestep in simulation
 
 			// function that returns true if the system is stable to indicate
 			// that the layout can be stopped

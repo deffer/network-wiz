@@ -176,7 +176,7 @@ angular.module("dataManipulation", []).factory("dataManipulationService", [funct
 		});
 
 		_.each(nodes[3].entities[0].applications, function(app){
-			if (app.name != 'StudentAccommodationSubscribers')
+			if (app.name != 'StudentAccommodationSubscribers' && app.name != "StudentAdminSubscribers")
 				app.status = 'stopped';
 		});
 

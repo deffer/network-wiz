@@ -123,30 +123,98 @@ angular.module("datasource", []).factory("datasource", ['$http', '$q', function(
 	service.getOtherSystemNodes = function(){
 		var node1 = {
 			"name": "IDCards",
-			"entities": [ {
+			"entities": [{
+					"name": "idcardTopic",
+					"topic": "nz.ac.auckland.jms.identity.person",
+					"applications": [
+						{
+							"name": "StudentIDTAdminSubscribers",
+							"status": "running",
+							"version": "2.15",
+							"subscribers": [
+								{
+									"name": "StudentAdminIDTPerson",
+									"context": "StudentAdminPerson",
+									"endpoint": "https://esb.dev.mw.auckland.ac.nz/StudentAdmin/StudentAdminService"
+								}
+							]
+						},
+						{
+							"name": "StudentIDTAccommodationSubscribers",
+							"status": "running",
+							"version": "2.16",
+							"subscribers": [
+								{
+									"name": "StudentAccommodationIDTPerson",
+									"context": "StudentAccommodationPerson",
+									"endpoint": "https://ormadmpre01.pre.mw.auckland.ac.nz:8004/StudentAccommodation/StudentAccommodationService"
+								}
+							]
+						},
+						{
+							"name": "FacultyOfEducationIDTSubscribers",
+							"status": "running",
+							"version": "1.18",
+							"subscribers": [
+								{
+									"name": "FedssIDTPerson",
+									"context": "FedssPerson",
+									"endpoint": "https://esb.dev.mw.auckland.ac.nz/FacultyOfEducation/FedssService"
+								}
+							]
+						},
+						{
+							"name": "HRIDTSubscribers",
+							"status": "stopped",
+							"version": "1.8",
+							"subscribers": [
+								{
+									"name": "HRIDTEmployee",
+									"context": "HREmployee",
+									"endpoint": "https://esb.dev.mw.auckland.ac.nz/HR/HRService"
+								},
+								{
+									"name": "HRIDTApplicant",
+									"context": "HRApplicant",
+									"endpoint": "https://esb.dev.mw.auckland.ac.nz/HR/HRService"
+								},
+								{
+									"name": "IDTUnresolvedVisitor",
+									"context": "HREmployee",
+									"endpoint": "https://esb.dev.mw.auckland.ac.nz/HR/HRService"
+								}
+							]
+						}
+					]
+				}, {
 					"name": "idcardQueue",
 					"topic": "nz.ac.auckland.jms.identity.person",
-					"applications":  [{
+					"applications": [
+						{
 							"name": "StudentIDAdminSubscribers",
 							"status": "running",
 							"version": "2.15",
-							"subscribers": [{
-								"name": "StudentAdminIDPerson",
-								"context": "StudentAdminPerson",
-								"endpoint": "https://esb.dev.mw.auckland.ac.nz/StudentAdmin/StudentAdminService"
-							}
+							"subscribers": [
+								{
+									"name": "StudentAdminIDPerson",
+									"context": "StudentAdminPerson",
+									"endpoint": "https://esb.dev.mw.auckland.ac.nz/StudentAdmin/StudentAdminService"
+								}
 							]
-						},{
+						},
+						{
 							"name": "StudentIDAccommodationSubscribers",
 							"status": "running",
 							"version": "2.16",
-							"subscribers": [{
-								"name": "StudentAccommodationIDPerson",
-								"context": "StudentAccommodationPerson",
-								"endpoint": "https://ormadmpre01.pre.mw.auckland.ac.nz:8004/StudentAccommodation/StudentAccommodationService"
-							}
+							"subscribers": [
+								{
+									"name": "StudentAccommodationIDPerson",
+									"context": "StudentAccommodationPerson",
+									"endpoint": "https://ormadmpre01.pre.mw.auckland.ac.nz:8004/StudentAccommodation/StudentAccommodationService"
+								}
 							]
-						},{
+						},
+						{
 							"name": "FacultyOfEducationIDSubscribers",
 							"status": "running",
 							"version": "1.18",
@@ -155,20 +223,25 @@ angular.module("datasource", []).factory("datasource", ['$http', '$q', function(
 									"name": "FedssIDPerson",
 									"context": "FedssPerson",
 									"endpoint": "https://esb.dev.mw.auckland.ac.nz/FacultyOfEducation/FedssService"
-								}]
-						},{
+								}
+							]
+						},
+						{
 							"name": "HRIDSubscribers",
 							"status": "stopped",
 							"version": "1.8",
-							"subscribers": [{
+							"subscribers": [
+								{
 									"name": "HRIDEmployee",
 									"context": "HREmployee",
 									"endpoint": "https://esb.dev.mw.auckland.ac.nz/HR/HRService"
-								},{
+								},
+								{
 									"name": "HRIDApplicant",
 									"context": "HRApplicant",
 									"endpoint": "https://esb.dev.mw.auckland.ac.nz/HR/HRService"
-								},{
+								},
+								{
 									"name": "IDUnresolvedVisitor",
 									"context": "HREmployee",
 									"endpoint": "https://esb.dev.mw.auckland.ac.nz/HR/HRService"
