@@ -48,18 +48,28 @@
             height: 100%;
             width: 90%;
             position: absolute;
-            left: 100px;
+            left: 150px;
             top: 100px;
             background-color: lightgrey;
 
         }
+        .layersNav{
+            margin-top: 100px;
+            width: 100px;
+        }
         .layersNav a {
             display: block;
+            padding: 5px;
+            border: black solid 1px;
+            border-top: none;
+        }
+        .layersNav a:first-child {
+            border-top: black solid 1px;
         }
         .layersNav a.hasError {
             color: red;
         }
-        em {
+        .dialog .title {
             font-weight: bold;
         }
 
@@ -79,7 +89,7 @@
 <body ng-app="nwizApp" ng-controller="nwizController">
 
 <div class="layersNav">
-    <a ng-click="toggleLayer(0)">overview</a>
+    <a ng-click="toggleLayer(0)">Summary</a>
     <a ng-repeat="i in [1, 2, 3, 4]" ng-click="toggleLayer(i)" ng-class="{hasError: true}">{{servernames[i-1]}}</a>
 </div>
 
@@ -87,7 +97,7 @@
     <div id="hcy" class='square-content1'>
 	    <div class="dialog" ng-show="dialogShow">
             <div>
-                <span><em>{{currentNode.name}}</em>:</span>
+                <span class="title">{{currentNode.name}}:</span>
                 <span>{{currentNode.status}}</span>
             </div>
 		    <span ng-show="currentNode.endpoint">{{currentNode.endpoint}}</span>

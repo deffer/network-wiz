@@ -48,7 +48,7 @@ var nwizController = ["$scope", "datasource", "graphManipulationService", "dataM
 			var nodes = this;
 			$scope.currentNode = nodes.data("customData");
 			$scope.dialogShow = true;
-			$(".dialog").css("left", evt.cyRenderedPosition.x+100);
+			$(".dialog").css("left", evt.cyRenderedPosition.x+150); // canvas starts ar 150,100
 			$(".dialog").css("top", evt.cyRenderedPosition.y+100);
 			console.log(nodes);
 			$scope.$apply();
