@@ -9,18 +9,24 @@
 angular.module("nwizApp", ["datasource", "graphManipulation", "dataManipulation"]);
 
 var nwizController = ["$scope", "datasource", "graphManipulationService", "dataManipulationService", "$q",function($scope, datasource, gms, dms, $q){
+
+	// flags
 	$scope.maincy = true;
-
-	$scope.servernames = ['ormesbdev01', 'ormesbdev02', 'ormesbdev98', 'ormesbdev99'];
-	$scope.hasErrorsOnLayer = _.sample([false], $scope.servernames.length);
-
-
 	$scope.dialogShow = false;
 	$scope.layer = 0;
 
+	// data grouped by layers (servers). layer 0 is a summary layer
+	$scope.servernames = ['ormesbdev01', 'ormesbdev02', 'ormesbdev98', 'ormesbdev99'];
+	$scope.hasErrorsOnLayer = _.sample([false], $scope.servernames.length+1);
+	$scope.elementsCache = []; // elementsCache[1].EPR-identity  -> identity node on server ormesbdev02
+
+	// data grouped by systems
+	$scope.systems = null; // systems.EPR.instances[2] -> EPR in server ormesbdev98
+
+
 	datasource.loadNodes().then(function (systemsByServer) {
 
-		// regroup data, generate summary layer, update error statuses
+		// regroup data, generate summary layer, update error statuses, generate elements cache
 		$scope.prepareData(systemsByServer);
 
 		// run template layout to prepare system node's positions
@@ -65,9 +71,7 @@ var nwizController = ["$scope", "datasource", "graphManipulationService", "dataM
 		cyEl.cytoscape(gms.getGraphOptions(nodes, edges, $scope.onCyReady, undefined, $scope.refreshCurrentLayer));
 		$scope.cy = cyEl.cytoscape('get');
 
-		_.each($scope.systems, function(system){
-			gms.refreshStatuses($scope.cy, system.instances[0]);
-		});
+		$scope.refreshCurrentLayer();
 
 		$scope.cy.on('click', 'node', function(evt) {
 			var nodes = this;
@@ -97,14 +101,18 @@ var nwizController = ["$scope", "datasource", "graphManipulationService", "dataM
 		console.log("All systems clear");
 		console.log($scope.systems);
 
-		$scope.hasErrorsOnLayer = _.sample([false], $scope.servernames.length);
+		// just initializing with N values
+		$scope.hasErrorsOnLayer = $scope.getNObjects($scope.servernames.length+1, function(){ return false});
+		$scope.elementsCache = $scope.getNObjects($scope.servernames.length+1, function(){ return {}});
 
 		console.log("Running chaos monkey and merging...");
 		_.each($scope.systems, function(system){
 			dms.runChaosMonkey(system);
 			dms.createSummaryLayer(system);
+			// add system's data to layers cache
 			for (var i = 0; i<system.instances.length; i++){
 				$scope.hasErrorsOnLayer[i] = $scope.hasErrorsOnLayer[i] | system.hasErrors[i];
+				_.extend($scope.elementsCache[i], system.caches[i]);
 			}
 		});
 
@@ -114,9 +122,12 @@ var nwizController = ["$scope", "datasource", "graphManipulationService", "dataM
 
 	$scope.refreshCurrentLayer = function(){
 		console.log("Refreshing layer "+$scope.layer);
+
+		console.log($scope.elementsCache[$scope.layer]);
+		// TODO refresh statuses using cache of all elements on the layer
+
 		_.each($scope.systems, function(system){
 			gms.refreshStatuses($scope.cy, system.instances[$scope.layer]);
-			console.log( system.instances[$scope.layer]);
 		});
 	};
 
@@ -130,7 +141,6 @@ var nwizController = ["$scope", "datasource", "graphManipulationService", "dataM
 		console.log("Showing layer "+layer);
 		$scope.refreshCurrentLayer();
 		$scope.dialogShow = false;
-		//$scope.$apply();
 	};
 
 	$scope.$watch('maincy', function(){
@@ -141,4 +151,12 @@ var nwizController = ["$scope", "datasource", "graphManipulationService", "dataM
 			cy.reset(); cy.resize(); cy.forceRender(); // nothing works :(
 		}
 	});
+
+	$scope.getNObjects = function(n, factory){
+		var result = [];
+		for (var i=0; i<n; i++){
+			result.push(factory());
+		}
+		return result;
+	}
 }];

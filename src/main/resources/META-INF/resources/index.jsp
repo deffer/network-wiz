@@ -96,7 +96,7 @@
     <a ng-repeat="i in servernames" ng-click="toggleLayer($index+1)" ng-class="{hasError: hasErrorsOnLayer[$index+1]}">{{servernames[$index]}}</a>
 </div>
 <div>
-    <label for="maincy">Main layer</label>
+    <label for="maincy">Bender</label>
     <input type="checkbox" ng-model="maincy"/>
 </div>
 
