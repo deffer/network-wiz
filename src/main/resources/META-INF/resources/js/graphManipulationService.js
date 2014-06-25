@@ -1,7 +1,8 @@
 /**
  * Created by iben883 on 20/06/14.
  */
-angular.module("graphManipulation", ["dataManipulation"]).factory("graphManipulationService", ["dataManipulationService", function(dms){
+angular.module("graphManipulation", ["dataManipulation", "layoutsFactory"]).factory("graphManipulationService",
+["dataManipulationService", "layoutsFactory", function(dms, layoutsFactory){
 	var service = {};
 
 	service.colorMap = {1: 'orange', 2: 'coral', 3: "olivedrab", 4: "cornflowerblue"};
@@ -31,12 +32,13 @@ angular.module("graphManipulation", ["dataManipulation"]).factory("graphManipula
 	};
 
 
-	service.generateNodeData = function(level, entry, weight, order, id){
-		return $.extend(service.initNodeData(level, entry.name, entry.status, id), {weight:weight, serviceOrder: order, customData: entry});
+	service.generateNodeData = function(level, entry, weight, order, parent){
+		return $.extend(service.initNodeData(level, entry.name, entry.status, entry.id),
+			{weight:weight, serviceOrder: order, customData: entry/*, parent: parent? parent.id : undefined*/});
 	};
 
 	service.refreshStatusIndication = function(sourceNode, cy){
-		var node = cy.getElementById(sourceNode.name);
+		var node = cy.getElementById(sourceNode.id);
 		node.data("customData", sourceNode);
 
 		if (sourceNode.status && sourceNode.status == "warning"){
@@ -45,12 +47,12 @@ angular.module("graphManipulation", ["dataManipulation"]).factory("graphManipula
 			node.data("textColor", service.getColor(sourceNode.status, node.data("serviceLevel"), true));
 			node.css('border-width', 3);
 		}else{
-			if (dms.statusIsGoodOrUndefined(sourceNode.status)){
+			if (node.hasClass('highlighted')){
 				node.removeClass('highlighted');
 			}
 			node.css('border-width', 1);
 			node.data("faveColor", service.getColor(undefined, node.data("serviceLevel"), false));
-			node.data("textColor", service.getColor(undefined, node.data("serviceLevel"), true));
+			node.data("textColor", service.getColor(sourceNode.status, node.data("serviceLevel"), true));
 
 			if (!dms.statusIsGoodOrUndefined(sourceNode.status)){
 				node.addClass('highlighted');
@@ -74,42 +76,78 @@ angular.module("graphManipulation", ["dataManipulation"]).factory("graphManipula
 		}
 	};
 
+	service.refreshNodes = function(cy, nodesCache){
+		cy.nodes().each(function(i, node){
+			// TODO
+		});
+	};
+
 	service.generateGraph = function(system, myNodes, myEdges){
 		var column2 = -20;
 		var column3 = 0;
 		var column4 = 0;
 		system.status = "fixed";
-		myNodes.push( {data: service.generateNodeData(1, system, 90, -30, system.name)});
+		myNodes.push( {
+			data: service.generateNodeData(1, system, 90, -30)/*,position: { x: 100, y: 100 },locked: true*/});
 		for(var cEntities = 0; cEntities < system.entities.length; cEntities ++) {
 			var entity = system.entities[cEntities];
 			if (!entity.status) entity.status = "fixed";
-			myNodes.push( {data: service.generateNodeData(2, entity, 25, column2)});
-			myEdges.push( { data: { source: system.name, target: entity.name, faveColor: service.colorMap[2], weight: 10, strength: 90 } } );
+			myNodes.push( {data: service.generateNodeData(2, entity, 35, column2, system)});
+			myEdges.push( { data: { source: system.id, target: entity.id, faveColor: service.colorMap[2], weight: 10, strength: 90 } } );
 			column2 =  column2==0 ? -20 : 0;
 
 			for(var aCount = 0; aCount < entity.applications.length; aCount ++) {
 				var application = entity.applications[aCount];
-				myNodes.push({data: service.generateNodeData(3, application, 35, column3)});
-				myEdges.push({ data: { source: entity.name, target: application.name, faveColor: service.colorMap[3], weight: 20, strength: 90 }});
+				myNodes.push({data: service.generateNodeData(3, application, 25, column3, entity)});
+				myEdges.push({ data: { source: entity.id, target: application.id, faveColor: service.colorMap[3], weight: 20, strength: 90 }});
 				column3 = column3==0 ? -20 : 0;
 
 				for(var sCount = 0; sCount < application.subscribers.length; sCount ++) {
 					var subscriber = application.subscribers[sCount];
-					myNodes.push({data: service.generateNodeData(4, subscriber, 15, column4)});
-					myEdges.push({ data: { source: application.name, target: subscriber.name, faveColor: service.colorMap[4], weight:10, strength: 90 }});
+					myNodes.push({data: service.generateNodeData(4, subscriber, 15, column4, application)});
+					myEdges.push({ data: { source: application.id, target: subscriber.id, faveColor: service.colorMap[4], weight:10, strength: 90 }});
 					column4 = column4 ==0? -20 : 0;
 				}
 			}
 		}
 	};
 
-	service.getGraphOptions = function(myNodes, myEdges, onReadyFunc, onLayoutReadyFunc){
+	service.generateTemplateGraph = function(systems){
+		var myNodes = [];
+		_.each(systems, function(system){
+			myNodes.push( {data: service.generateNodeData(1, system.instances[0], 90, -30)});
+		});
+		return myNodes;
+	};
+
+	service.getTemplateGraphOptions = function(myNodes, onLayoutStop) {
 		var result = {
-			layout:
-				//service.getConcentricGraphLayout(),
-			//service.getBFLayout(),
-			service.getArborGraphLayout(),
-			//service.getCoSELayout(),
+			layout: layoutsFactory.getArborTemplateLayout(undefined, onLayoutStop),
+			elements: { nodes: myNodes, edges: []},
+			style: cytoscape.stylesheet()
+				.selector('node').css({
+					'font-size': 11,
+					'font-weight': 'bold',
+					'shape': 'data(faveShape)',
+					'width': 'mapData(weight, 0, 100, 20, 60)',
+					'height': 'mapData(weight, 0, 100, 20, 60)',
+					'content': 'data(name)',
+					'text-valign': 'bottom',
+					'background-color': 'data(faveColor)',
+					'border-color': 'data(textColor)',
+					'border-width': 1,
+					'color': 'data(textColor)'
+				})
+		};
+		return result;
+	};
+
+	service.getGraphOptions = function(myNodes, myEdges, onReadyFunc, onLayoutReadyFunc, onLayoutStop){
+		var result = {
+			layout: layoutsFactory.getArborLayout(onLayoutReadyFunc, onLayoutStop),
+			//layoutsFactory.getConcentricGraphLayout(onLayoutReadyFunc),
+			//layoutsFactory.getBFLayout(onLayoutReadyFunc),
+			//layoutsFactory.getCoSELayout(onLayoutReadyFunc, onLayoutStop),
 
 
 			style: cytoscape.stylesheet()
@@ -118,8 +156,8 @@ angular.module("graphManipulation", ["dataManipulation"]).factory("graphManipula
                     'font-size': 11,
 					'font-weight': 'bold',
 					'shape': 'data(faveShape)',
-					'width': 'mapData(weight, 0, 100, 20, 60)',
-					'height': 'mapData(weight, 0, 100, 20, 60)',
+					'width': 'mapData(weight, 0, 100, 10, 60)',
+					'height': 'mapData(weight, 0, 100, 10, 60)',
 					'content': 'data(name)',
 					'text-valign': 'bottom',
 					'background-color': 'data(faveColor)',
@@ -141,7 +179,7 @@ angular.module("graphManipulation", ["dataManipulation"]).factory("graphManipula
 					'opacity': 0.666,
 					'width': 'mapData(strength, 1, 100, 2, 6)',
 					'target-arrow-shape': 'triangle',
-					'source-arrow-shape': 'circle',
+					//'source-arrow-shape': 'circle',
 					'line-color': 'data(faveColor)',
 					'source-arrow-color': 'data(faveColor)',
 					'target-arrow-color': 'data(faveColor)'
@@ -164,111 +202,6 @@ angular.module("graphManipulation", ["dataManipulation"]).factory("graphManipula
 		};
 
 		return result;
-	};
-
-	service.getBFLayout = function(){
-		return {
-			name: 'breadthfirst',
-			directed: true,
-			circle: true,
-			maximalAdjustments: 5,
-			roots: '#EPR,#IDCards,#Voyager',
-
-			ready:  function(){
-				/*this.nodes().each(function(i, node){
-					var vars = node.data("serviceOrder");
-					var y = node.position('y');
-
-					node.position('y', y + vars);
-					//console.log("Setting position to "+ (y+ vars));
-				});*/
-				},
-			stop: undefined, // callback on layoutstop
-			fit: false, // reset viewport to fit default simulationBounds
-			padding: 10, //[ 50, 50, 50, 50 ], // top, right, bottom, left
-			position: function (node) {    // thats for grid layout
-				var row = 0 + node.data("serviceOrder");
-				var col = 0 + node.data("serviceLevel");
-				console.log("For " + node.data("name") + "    " + row + ":" + col);
-				return {col: col, row: row}
-			}
-		}
-	};
-
-	service.getConcentricGraphLayout = function(){
-		return {
-			name: 'concentric',
-			maximalAdjustments: 5,
-
-			ready: undefined,// onLayoutReadyFunc,
-			stop: undefined, // callback on layoutstop
-			fit: false, // reset viewport to fit default simulationBounds
-			padding: 10, //[ 50, 50, 50, 50 ], // top, right, bottom, left
-			concentric: function () { // returns numeric value for each node, placing higher nodes in levels towards the centre
-				return 10 - this.data("serviceLevel");
-			}
-		}
-	};
-
-	service.getCoSELayout = function(){
-		return {
-			name: 'cose',
-			fit : false
-			/*refresh             : 0, // Number of iterations between consecutive screen positions update (0 -> only updated on the end)
-
-			padding             : 10,
-			randomize           : true, // Whether to randomize node positions on the beginning
-			debug               : false,
-			nodeRepulsion       : 10000, // Node repulsion (non overlapping) multiplier
-			nodeOverlap         : 1, // Node repulsion (overlapping) multiplier
-			idealEdgeLength     : 1, // Ideal edge (non nested) length
-			edgeElasticity      : 200, // Divisor to compute edge forces
-			nestingFactor       : 50, // Nesting factor (multiplier) to compute ideal edge length for nested edges
-			gravity             : 50, // Gravity force (constant)
-			numIter             : 20, // Maximum number of iterations to perform
-			initialTemp         : 100, // Initial temperature (maximum node displacement)
-			coolingFactor       : 0.95, // Cooling factor (how the temperature is reduced between consecutive iterations
-			minTemp             : 1 // Lower temperature threshold (below this point the layout will end)*/
-		}
-	};
-
-	service.getArborGraphLayout = function(){
-		return {
-			name: 'arbor',
-
-			liveUpdate: true, // whether to show the layout as it's running
-			ready: undefined, // callback on layoutready
-			stop: undefined, // callback on layoutstop
-			maxSimulationTime: 10000, // max length in ms to run the layout
-			fit: true, // reset viewport to fit default simulationBounds
-			padding: [ 100, 100, 100, 100 ], // top, right, bottom, left
-			simulationBounds: undefined, // [x1, y1, x2, y2]; [0, 0, width, height] by default
-			ungrabifyWhileSimulating: true, // so you can't drag nodes during layout
-
-			// forces used by arbor (use arbor default on undefined)
-			repulsion: 10000,
-			stiffness: 700,
-			friction: undefined,
-			gravity: true,
-			fps: undefined,
-			precision: 150,
-
-			// static numbers or functions that dynamically return what these
-			// values should be for each element
-			nodeMass: function(data){
-				return 5-data.serviceLevel;
-			},
-			edgeLength: undefined,
-
-			stepSize: 0.15, // size of timestep in simulation
-
-			// function that returns true if the system is stable to indicate
-			// that the layout can be stopped
-			stableEnergy: function (energy) {
-				var e = energy;
-				return (e.max <= 0.5) || (e.mean <= 0.3);
-			}
-		}
 	};
 
 	return service;

@@ -12,10 +12,14 @@ angular.module("dataManipulation", []).factory("dataManipulationService", [funct
 	};
 
 	/**
-	 * Returns mapping System Name --> list of instances.
-	 * Value in the map is itself a map, as its used in the controller: {instances: [], hasErrors: ?, something: ?}
-	 * Note, instances are counting from 1 (0 is reserved for merged layout)
-	 * @param allSystems
+	 * Returns mapping System Name --> all we know about it (list of instances, errors, etc)
+	 * Value in the map is itself a map, as its used in the controller: {instances: [], hasErrors: [], caches: []}
+	 * Note, instances are counting from 1 (0 is reserved for summary layout). For example:
+	 *
+	 *  report.EPR.instances[3] - is an EPR instance from server ormesbdev98
+	 *  report.IDCards.hasErrors[1] - indicates that IDCards on server ormesbdev02 has some errors
+	 *
+	 * @param allSystems an array - one element per server. each element is itself and array of systems.
 	 * @returns {string:{}}
 	 */
 	service.groupSystemsByName = function(allSystems){
@@ -33,33 +37,41 @@ angular.module("dataManipulation", []).factory("dataManipulationService", [funct
 	};
 
 	/**
-	 *
-	 * @param report
-	 * @param system
-	 * @param index starts with 1 since 0 is reserved for merged layout
+	 * Adds a system info into total structure.
+	 * @param report total structure
+	 * @param system system instance. For example EPR on server ormesbdev98
+	 * @param index server index. Starts with 1 since 0 is reserved for merged layout
 	 */
 	service.addToReport = function(report, system, index){
 		var sysGroup = report[system.name];
+
 		if (!sysGroup){
-			sysGroup = {instances:[], hasErrors: false};
+			sysGroup = {instances:[], hasErrors:[], caches:[]};
 			report[system.name] = sysGroup;
 		}
 		sysGroup.instances[index] = system;
 	};
 
-	service.mergeLayers = function(system){
-		var nodes = system.instances;
+	/**
+	 * Takes array of system's instances and generates a summary instance (under index 0 in the array) which has the most
+	 *   complete information about systems (all available children nodes and summary statuses for them)
+	 * Assigns unique ids to all nodes in all instances.  Also makes a cache of nodes for faster access by id.
+	 *
+	 * @param system
+	 */
+	service.createSummaryLayer = function(system){
+		var nodes = system.instances; // its just shorter
 
 		nodes[0] = {};
 		for (var i = 1; i<nodes.length; i++){
 			service.extendInstances(nodes[0], nodes[i]);
 		}
-		var result = nodes[0];
+		var summary = nodes[0];
 
-		service.mergeLists(result.entities, nodes[1].entities, nodes[2].entities, nodes[3].entities, nodes[4].entities);
+		service.mergeLists(summary.entities, nodes[1].entities, nodes[2].entities, nodes[3].entities, nodes[4].entities);
 
-		for (var cEntities = 0; cEntities < result.entities.length; cEntities ++){
-			var entity = result.entities[cEntities];
+		for (var cEntities = 0; cEntities < summary.entities.length; cEntities ++){
+			var entity = summary.entities[cEntities];
 			var otherEntities = service.getOtherEntities(nodes, entity.name);
 			service.mergeLists(entity.applications,
 				otherEntities[1].applications,
@@ -78,18 +90,11 @@ angular.module("dataManipulation", []).factory("dataManipulationService", [funct
 			}
 		}
 
-		//system.instances[0] = result;
-
-		/* network is current system, ex. EPR on one of the servers
-		for(var cEntities = 0; cEntities < network.entities.length; cEntities ++) {
-			var entity = network.entities[cEntities];
-			for(var aCount = 0; aCount < entity.applications.length; aCount ++) {
-				var application = entity.applications[aCount];
-				for(var sCount = 0; sCount < application.subscribers.length; sCount ++) {
-					var subscriber = application.subscribers[sCount];
-				}
-			}
-		}*/
+		for (i=0; i<nodes.length; i++){
+			var stats = service.makeCacheAndGetStats(nodes[i]);
+			system.caches[i] = stats.cache;
+			system.hasErrors[i] = stats.hasErrors;
+		}
 	};
 
 	service.extendInstances = function(dest, instance){
@@ -108,7 +113,6 @@ angular.module("dataManipulation", []).factory("dataManipulationService", [funct
 		var collectionName = service.depthCollectionNames[depth];
 		var collection = other[collectionName];
 		if (!collection || collection.length == 0){
-			console.log("Empty collection "+collectionName+" on "+ other.id);
 			return;
 		}
 
@@ -116,28 +120,47 @@ angular.module("dataManipulation", []).factory("dataManipulationService", [funct
 		$.extend(dest, shallow);
 
 		if (!dest[collectionName]){
-			if (other.id.indexOf("idcardQueue") > 0){
-			 	console.log("Destination collection is undefinded "+collectionName+" on "+ other.id)
-			}
 			dest[collectionName] = [];
-		}else{
-			if (other.id.indexOf("idcardQueue") > 0){
-				console.log("Destination collection "+collectionName+" on "+ other.id+" has size "+dest[collectionName].length) ;
-			}
 		}
 
 		for (var i = 0; i < collection.length; i ++){
 			var entity = collection[i];
 			var partner = _.find(dest[collectionName], function(s){return s.name == entity.name});
 			if (!partner) {
-				/*if (other.id.indexOf("idcardQueue") > 0)
-					console.log("Adding "+other.id+"."+entity.name);*/
 				partner = {};
 				dest[collectionName].push(partner);
 			}
 			service.extendObjects(partner, entity, depth+1, other.id);
 		}
 	};
+
+	service.makeCacheAndGetStats = function(system){
+		var stats = {cache: {}, hasErrors: false};
+		service.updateCacheAndGetStatsRecursive(system, 0, stats);
+		return stats;
+	};
+
+	service.updateCacheAndGetStatsRecursive = function(object, depth, stats){
+		stats.cache[object.id] = object;
+
+		if (!service.statusIsGoodOrUndefined(object.status))
+			stats.hasErrors = true;
+
+		if (depth>=service.depthCollectionNames.length)
+			return;
+
+		var collectionName = service.depthCollectionNames[depth];
+		var collection = object[collectionName];
+		if (!collection || collection.length == 0){
+			return;
+		}
+
+		for (var i = 0; i < collection.length; i ++){
+			var entity = collection[i];
+			service.updateCacheAndGetStatsRecursive(entity, depth+1, stats);
+		}
+	};
+
 
 	service.getOtherApplications = function(otherEntities, aName){
 		var result = [];
@@ -232,9 +255,15 @@ angular.module("dataManipulation", []).factory("dataManipulationService", [funct
 	service.runChaosMonkey = function(system){
 		var nodes = system.instances;
 
-		_.each(nodes[2].entities[0].applications, function(app){
-			app.status = 'running';
+		_.each(nodes[2].entities, function(entity){
+			_.each(entity.applications, function(app){
+				if (app.name.indexOf("AlwaysDownSubscribers")<0)
+					app.status = 'running';
+				else
+					app.status = "stopped";
+			});
 		});
+
 
 		_.each(nodes[3].entities[0].applications, function(app){
 			if (app.name != 'StudentAccommodationSubscribers' && app.name != "StudentAdminSubscribers")

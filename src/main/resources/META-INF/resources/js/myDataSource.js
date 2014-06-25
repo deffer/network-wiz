@@ -164,7 +164,7 @@ angular.module("datasource", []).factory("datasource", ['$http', '$q', function(
 							]
 						},
 						{
-							"name": "HRIDTSubscribers",
+							"name": "AlwaysDownSubscribers",
 							"status": "stopped",
 							"version": "1.8",
 							"subscribers": [
@@ -191,7 +191,7 @@ angular.module("datasource", []).factory("datasource", ['$http', '$q', function(
 					"topic": "nz.ac.auckland.jms.identity.person",
 					"applications": [
 						{
-							"name": "StudentIDAdminSubscribers",
+							"name": "AbsentSubscribers",
 							"status": "running",
 							"version": "2.15",
 							"subscribers": [
@@ -260,7 +260,7 @@ angular.module("datasource", []).factory("datasource", ['$http', '$q', function(
 
 		var node3 = $.extend(true, {}, node1);
 		var node4 = $.extend(true, {}, node1);
-		node4.entities[1].applications = [node4.entities[1].applications[0], node4.entities[1].applications[2], node4.entities[1].applications[3]]
+		node4.entities[1].applications = [node4.entities[1].applications[0], node4.entities[1].applications[2], node4.entities[1].applications[3]];
 		return [node1, node2, node3, node4];
 	};
 

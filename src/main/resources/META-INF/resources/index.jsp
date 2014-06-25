@@ -41,7 +41,7 @@
             color: white
         }
 
-        #cy {
+        .cy {
 	        /*margin-top: 100px;*/
             min-height: 900px;
 	        /*margin-left: 100px;*/
@@ -54,7 +54,7 @@
 
         }
         .layersNav{
-            margin-top: 100px;
+            margin-top: 300px;
             width: 100px;
         }
         .layersNav a {
@@ -92,8 +92,12 @@
 <body ng-app="nwizApp" ng-controller="nwizController">
 
 <div class="layersNav">
-    <a ng-click="toggleLayer(0)">Summary</a>
-    <a ng-repeat="i in [1, 2, 3, 4]" ng-click="toggleLayer(i)" ng-class="{hasError: true}">{{servernames[i-1]}}</a>
+    <a ng-click="toggleLayer(0)" ng-class="{hasError: hasErrorsOnLayer[0]}">Summary</a>
+    <a ng-repeat="i in servernames" ng-click="toggleLayer($index+1)" ng-class="{hasError: hasErrorsOnLayer[$index+1]}">{{servernames[$index]}}</a>
+</div>
+<div>
+    <label for="maincy">Main layer</label>
+    <input type="checkbox" ng-model="maincy"/>
 </div>
 
 <div id="cys" class="square-box1">
@@ -105,7 +109,9 @@
             </div>
 		    <span ng-show="currentNode.endpoint">{{currentNode.endpoint}}</span>
 	    </div>
-        <div id="cy"> </div>
+
+        <div id="maincy" class="cy" ng-show="maincy"> </div>
+        <div id="hiddency" class="cy" ng-show="!maincy"> </div>
     </div>
 
 </div>

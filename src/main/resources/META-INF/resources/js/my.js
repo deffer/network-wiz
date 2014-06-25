@@ -8,40 +8,61 @@
 
 angular.module("nwizApp", ["datasource", "graphManipulation", "dataManipulation"]);
 
-var nwizController = ["$scope", "datasource", "graphManipulationService", "dataManipulationService",function($scope, datasource, gms, dms){
-	var cyEl = $('#cy');
-	var myNodes = [];
-	var myEdges = [];
+var nwizController = ["$scope", "datasource", "graphManipulationService", "dataManipulationService", "$q",function($scope, datasource, gms, dms, $q){
+	$scope.maincy = true;
 
-	var nodes = [];
 	$scope.servernames = ['ormesbdev01', 'ormesbdev02', 'ormesbdev98', 'ormesbdev99'];
+	$scope.hasErrorsOnLayer = _.sample([false], $scope.servernames.length);
+
 
 	$scope.dialogShow = false;
+	$scope.layer = 0;
 
-	datasource.loadNodes().then(function (systems) {
-		console.log("Updating nodes");
-		$scope.systems = dms.groupSystemsByName(systems);
+	datasource.loadNodes().then(function (systemsByServer) {
 
-		dms.addMockDataToReport(datasource.getOtherSystemNodes(), $scope.systems);
-		dms.addMockDataToReport(datasource.getAnotherSystemNodes(), $scope.systems);
+		// regroup data, generate summary layer, update error statuses
+		$scope.prepareData(systemsByServer);
 
-		console.log("All systems clear");
-		console.log($scope.systems);
+		// run template layout to prepare system node's positions
+		var defer = $q.defer();
+		var whenTemplateReady = defer.promise;
+		defer.resolve(); // in case we want to wait for other layout to finish first
 
-		console.log("Running chaos monkey and merging");
-		_.each($scope.systems, function(system){
-			dms.runChaosMonkey(system);
-			dms.mergeLayers(system);
-		});
+		$('#hiddency').cytoscape(gms.getTemplateGraphOptions(gms.generateTemplateGraph($scope.systems), /*defer.resolve*/ undefined));
 
-		console.log("Graph data ready");
-		console.log($scope.systems);
 
+		// generate data for graph from summary layer (structure, names, initial colors reflecting statuses)
+		var myNodes = [];
+		var myEdges = [];
 		_.each($scope.systems, function(system){
 			gms.generateGraph(system.instances[0], myNodes, myEdges);
 		});
 
-		cyEl.cytoscape(gms.getGraphOptions(myNodes, myEdges, $scope.onCyReady));
+		// lock screen position of system nodes as per template values
+		whenTemplateReady.then(function(){
+			//$scope.updateNodePositionFromOtherCy($('#hiddency').cytoscape('get'), myNodes);
+			$scope.makeCy(myNodes, myEdges);
+		});
+
+
+	});
+
+	$scope.updateNodePositionFromOtherCy = function(otherCy, nodes){
+		_.each($scope.systems, function(systemInstances){
+			var system = systemInstances.instances[0];
+			var templateNode = otherCy.getElementById(system.id);
+			var node = _.find(nodes, function(f){return f.data.id == system.id});
+			node['locked'] = true;
+			node['position'] = {x: templateNode.position('x'), y: templateNode.position('y')};
+			console.log("Locking node "+system.name+" in place "+templateNode.position('x')+", "+templateNode.position('y'));
+		});
+
+	};
+
+	$scope.makeCy = function(nodes, edges){
+
+		var cyEl = $('#maincy');
+		cyEl.cytoscape(gms.getGraphOptions(nodes, edges, $scope.onCyReady, undefined, $scope.refreshCurrentLayer));
 		$scope.cy = cyEl.cytoscape('get');
 
 		_.each($scope.systems, function(system){
@@ -64,8 +85,40 @@ var nwizController = ["$scope", "datasource", "graphManipulationService", "dataM
 				$scope.$apply();
 			}
 		});
-	});
+	};
 
+	$scope.prepareData = function(systemsByServer){
+		console.log("Updating nodes");
+		$scope.systems = dms.groupSystemsByName(systemsByServer);
+
+		dms.addMockDataToReport(datasource.getOtherSystemNodes(), $scope.systems);
+		dms.addMockDataToReport(datasource.getAnotherSystemNodes(), $scope.systems);
+
+		console.log("All systems clear");
+		console.log($scope.systems);
+
+		$scope.hasErrorsOnLayer = _.sample([false], $scope.servernames.length);
+
+		console.log("Running chaos monkey and merging...");
+		_.each($scope.systems, function(system){
+			dms.runChaosMonkey(system);
+			dms.createSummaryLayer(system);
+			for (var i = 0; i<system.instances.length; i++){
+				$scope.hasErrorsOnLayer[i] = $scope.hasErrorsOnLayer[i] | system.hasErrors[i];
+			}
+		});
+
+		console.log("Graph data ready");
+		console.log($scope.systems);
+	};
+
+	$scope.refreshCurrentLayer = function(){
+		console.log("Refreshing layer "+$scope.layer);
+		_.each($scope.systems, function(system){
+			gms.refreshStatuses($scope.cy, system.instances[$scope.layer]);
+			console.log( system.instances[$scope.layer]);
+		});
+	};
 
 	$scope.onCyReady = function(){
 		console.log("Cy ready");
@@ -73,14 +126,19 @@ var nwizController = ["$scope", "datasource", "graphManipulationService", "dataM
 	};
 
 	$scope.toggleLayer = function(layer){
+		$scope.layer = layer;
 		console.log("Showing layer "+layer);
-
-		_.each($scope.systems, function(system){
-			gms.refreshStatuses($scope.cy, system.instances[layer]);
-			console.log( system.instances[layer]);
-		});
-
+		$scope.refreshCurrentLayer();
 		$scope.dialogShow = false;
 		//$scope.$apply();
 	};
+
+	$scope.$watch('maincy', function(){
+		if ($scope.maincy){
+			if ($scope.cy) $scope.cy.forceRender();
+		}else{
+			var cy = $('#hiddency').cytoscape('get');
+			cy.reset(); cy.resize(); cy.forceRender(); // nothing works :(
+		}
+	});
 }];
