@@ -44,18 +44,20 @@ angular.module("graphManipulation", ["dataManipulation", "layoutsFactory"]).fact
 			node.removeClass('highlighted');
 		}
 
-		if (sourceNode.status && sourceNode.status == "warning"){
+		if (sourceNode.status == "warning"){
 			node.data("faveColor", service.getColor(undefined, node.data("serviceLevel"), false));
 			node.data("textColor", service.getColor(sourceNode.status, node.data("serviceLevel"), true));
 			node.css('border-width', 3);
 		}else{
-
 			node.css('border-width', 1);
-			node.data("faveColor", service.getColor(undefined, node.data("serviceLevel"), false));
 			node.data("textColor", service.getColor(sourceNode.status, node.data("serviceLevel"), true));
-
-			if (!dms.statusIsGoodOrUndefined(sourceNode.status)){
-				node.addClass('highlighted');
+			if (sourceNode.status == "unavailable"){
+				node.data("faveColor", service.getColor(sourceNode.status, node.data("serviceLevel"), false));
+			}else {
+				node.data("faveColor", service.getColor(undefined, node.data("serviceLevel"), false));
+				if (!dms.statusIsGoodOrUndefined(sourceNode.status)) {
+					node.addClass('highlighted');
+				}
 			}
 		}
 	};

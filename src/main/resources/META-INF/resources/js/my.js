@@ -34,7 +34,7 @@ var nwizController = ["$scope", "datasource", "graphManipulationService", "dataM
 		var whenTemplateReady = defer.promise;
 		defer.resolve(); // in case we want to wait for other layout to finish first
 
-		$('#hiddency').cytoscape(gms.getTemplateGraphOptions(gms.generateTemplateGraph($scope.systems), /*defer.resolve*/ undefined));
+		$('#maincy').cytoscape(gms.getTemplateGraphOptions(gms.generateTemplateGraph($scope.systems)/*, defer.resolve*/));
 
 
 		// generate data for graph from summary layer (structure, names, initial colors reflecting statuses)
@@ -46,7 +46,7 @@ var nwizController = ["$scope", "datasource", "graphManipulationService", "dataM
 
 		// lock screen position of system nodes as per template values
 		whenTemplateReady.then(function(){
-			//$scope.updateNodePositionFromOtherCy($('#hiddency').cytoscape('get'), myNodes);
+			//$scope.updateNodePositionFromOtherCy($('#maincy').cytoscape('get'), myNodes);
 			$scope.makeCy(myNodes, myEdges);
 		});
 
@@ -54,14 +54,25 @@ var nwizController = ["$scope", "datasource", "graphManipulationService", "dataM
 	});
 
 	$scope.updateNodePositionFromOtherCy = function(otherCy, nodes){
-		_.each($scope.systems, function(systemInstances){
-			var system = systemInstances.instances[0];
-			var templateNode = otherCy.getElementById(system.id);
-			var node = _.find(nodes, function(f){return f.data.id == system.id});
-			node['locked'] = true;
-			node['position'] = {x: templateNode.position('x'), y: templateNode.position('y')};
-			console.log("Locking node "+system.name+" in place "+templateNode.position('x')+", "+templateNode.position('y'));
+		otherCy.nodes().each(function(i, node){
+			var x = node.position("x");
+			var y = node.position("y");
+			var systemName = node.data("name");
+			console.log(node);
+			console.log("For system "+systemName+" coordinates "+x+", "+y);
+
+			/*_.each(nodes, function(s){
+				if (s.data.id == systemName || s.data.id.indexOf(systemName+"-")==0){
+					s.locked = true;
+					s.position = {x: x, y: y};
+					s.data.x = x;
+					s.data.y = y;
+				}
+			});*/
+
 		});
+
+		/*node.position = {x: templateNode.position('x'), y: templateNode.position('y')};*/
 
 	};
 

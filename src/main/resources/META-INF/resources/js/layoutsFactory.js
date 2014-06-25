@@ -16,34 +16,36 @@ angular.module("layoutsFactory", []).factory("layoutsFactory", [function(){
 			ungrabifyWhileSimulating: true, // so you can't drag nodes during layout
 
 			// forces used by arbor (use arbor default on undefined)
-			repulsion: 100,
-			stiffness: 2000,
-			friction: undefined, //0.2,
-			gravity: true,
-			fps: undefined,
+			repulsion: 1000,
+			stiffness: 600,
+			friction: 0.5,
+			gravity: false,
+			fps: 55,
 			precision: 200,
 
 			// static numbers or functions that dynamically return what these
 			// values should be for each element
 			nodeMass: function(data){
-				var map = {'1': 5, '2': 4, '3': 3, '4': 1};
+				var map = {'1': 0.5, '2': 0.3, '3': 0.2, '4': 0.1};
 				return map[""+data.serviceLevel];
 			},
-			edgeLength: undefined,/*function(data){
+			edgeLength: undefined,
+			/*function(data){
 				return data.strength/100;
 			},*/
 
-			stepSize: 0.15, // size of timestep in simulation
+			stepSize: 0.5, // size of timestep in simulation
 
 			ready: onReady, // callback on layoutready
 			stop: onStop, // callback on layoutstop
 
 			// function that returns true if the system is stable to indicate
 			// that the layout can be stopped
-			stableEnergy: function (energy) {
+			stableEnergy: undefined
+			/*function (energy) {
 				var e = energy;
 				return (e.max <= 0.5) || (e.mean <= 0.3);
-			}
+			}*/
 		}
 	};
 
@@ -52,7 +54,7 @@ angular.module("layoutsFactory", []).factory("layoutsFactory", [function(){
 			name: 'arbor',
 
 			liveUpdate: true, // whether to show the layout as it's running
-			maxSimulationTime: 100, // max length in ms to run the layout
+			maxSimulationTime: 500, // max length in ms to run the layout
 			fit: true, // reset viewport to fit default simulationBounds
 			padding: [ 100, 100, 100, 100 ], // top, right, bottom, left
 			simulationBounds: undefined, // [x1, y1, x2, y2]; [0, 0, width, height] by default
