@@ -122,13 +122,8 @@ var nwizController = ["$scope", "datasource", "graphManipulationService", "dataM
 
 	$scope.refreshCurrentLayer = function(){
 		console.log("Refreshing layer "+$scope.layer);
-
 		console.log($scope.elementsCache[$scope.layer]);
-		// TODO refresh statuses using cache of all elements on the layer
-
-		_.each($scope.systems, function(system){
-			gms.refreshStatuses($scope.cy, system.instances[$scope.layer]);
-		});
+		gms.refreshNodes($scope.cy, $scope.elementsCache[$scope.layer]);
 	};
 
 	$scope.onCyReady = function(){

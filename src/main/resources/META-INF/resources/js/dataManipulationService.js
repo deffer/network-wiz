@@ -64,7 +64,7 @@ angular.module("dataManipulation", []).factory("dataManipulationService", [funct
 
 		nodes[0] = {};
 		for (var i = 1; i<nodes.length; i++){
-			service.extendInstances(nodes[0], nodes[i]);
+			service.extendInstance(nodes[0], nodes[i]);
 		}
 		var summary = nodes[0];
 
@@ -97,12 +97,12 @@ angular.module("dataManipulation", []).factory("dataManipulationService", [funct
 		}
 	};
 
-	service.extendInstances = function(dest, instance){
-		service.extendObjects(dest, instance, 0);
+	service.extendInstance = function(dest, instance){
+		service.extendObjectRecursive(dest, instance, 0);
 	};
 
 	service.depthCollectionNames = ['entities', 'applications', 'subscribers'];
-	service.extendObjects = function(dest, other, depth, nameContext){
+	service.extendObjectRecursive = function(dest, other, depth, nameContext){
 		other.id = nameContext? nameContext+'-'+other.name : other.name;
 
 		if (depth>=service.depthCollectionNames.length) {
@@ -130,10 +130,16 @@ angular.module("dataManipulation", []).factory("dataManipulationService", [funct
 				partner = {};
 				dest[collectionName].push(partner);
 			}
-			service.extendObjects(partner, entity, depth+1, other.id);
+			service.extendObjectRecursive(partner, entity, depth+1, other.id);
 		}
 	};
 
+
+	/**
+	 *
+	 * @param system one system on one server (layer)
+	 * @returns {{cache: {}, hasErrors: boolean}}
+	 */
 	service.makeCacheAndGetStats = function(system){
 		var stats = {cache: {}, hasErrors: false};
 		service.updateCacheAndGetStatsRecursive(system, 0, stats);

@@ -37,19 +37,19 @@ angular.module("graphManipulation", ["dataManipulation", "layoutsFactory"]).fact
 			{weight:weight, serviceOrder: order, customData: entry/*, parent: parent? parent.id : undefined*/});
 	};
 
-	service.refreshStatusIndication = function(sourceNode, cy){
-		var node = cy.getElementById(sourceNode.id);
+	service.refreshStatusIndication = function(sourceNode, node){
 		node.data("customData", sourceNode);
 
-		if (sourceNode.status && sourceNode.status == "warning"){
+		if (node.hasClass('highlighted')){
 			node.removeClass('highlighted');
+		}
+
+		if (sourceNode.status && sourceNode.status == "warning"){
 			node.data("faveColor", service.getColor(undefined, node.data("serviceLevel"), false));
 			node.data("textColor", service.getColor(sourceNode.status, node.data("serviceLevel"), true));
 			node.css('border-width', 3);
 		}else{
-			if (node.hasClass('highlighted')){
-				node.removeClass('highlighted');
-			}
+
 			node.css('border-width', 1);
 			node.data("faveColor", service.getColor(undefined, node.data("serviceLevel"), false));
 			node.data("textColor", service.getColor(sourceNode.status, node.data("serviceLevel"), true));
@@ -60,25 +60,12 @@ angular.module("graphManipulation", ["dataManipulation", "layoutsFactory"]).fact
 		}
 	};
 
-	service.refreshStatuses = function(cy, network){
-		service.refreshStatusIndication(network, cy);
-		for(var cEntities = 0; cEntities < network.entities.length; cEntities ++) {
-			var entity = network.entities[cEntities];
-			service.refreshStatusIndication(entity, cy);
-			for(var aCount = 0; aCount < entity.applications.length; aCount ++) {
-				var application = entity.applications[aCount];
-				service.refreshStatusIndication(application, cy);
-				for(var sCount = 0; sCount < application.subscribers.length; sCount ++) {
-					var subscriber = application.subscribers[sCount];
-					service.refreshStatusIndication(subscriber, cy);
-				}
-			}
-		}
-	};
-
 	service.refreshNodes = function(cy, nodesCache){
 		cy.nodes().each(function(i, node){
-			// TODO
+			var sourceNode = nodesCache[node.data("id")];
+			if (!sourceNode)
+				sourceNode = {id: node.id, status: "unavailable", name: 'unavailable'};
+			service.refreshStatusIndication(sourceNode, node);
 		});
 	};
 
@@ -110,36 +97,6 @@ angular.module("graphManipulation", ["dataManipulation", "layoutsFactory"]).fact
 				}
 			}
 		}
-	};
-
-	service.generateTemplateGraph = function(systems){
-		var myNodes = [];
-		_.each(systems, function(system){
-			myNodes.push( {data: service.generateNodeData(1, system.instances[0], 90, -30)});
-		});
-		return myNodes;
-	};
-
-	service.getTemplateGraphOptions = function(myNodes, onLayoutStop) {
-		var result = {
-			layout: layoutsFactory.getArborTemplateLayout(undefined, onLayoutStop),
-			elements: { nodes: myNodes, edges: []},
-			style: cytoscape.stylesheet()
-				.selector('node').css({
-					'font-size': 11,
-					'font-weight': 'bold',
-					'shape': 'data(faveShape)',
-					'width': 'mapData(weight, 0, 100, 20, 60)',
-					'height': 'mapData(weight, 0, 100, 20, 60)',
-					'content': 'data(name)',
-					'text-valign': 'bottom',
-					'background-color': 'data(faveColor)',
-					'border-color': 'data(textColor)',
-					'border-width': 1,
-					'color': 'data(textColor)'
-				})
-		};
-		return result;
 	};
 
 	service.getGraphOptions = function(myNodes, myEdges, onReadyFunc, onLayoutReadyFunc, onLayoutStop){
@@ -203,6 +160,37 @@ angular.module("graphManipulation", ["dataManipulation", "layoutsFactory"]).fact
 
 		return result;
 	};
+
+	service.generateTemplateGraph = function(systems){
+		var myNodes = [];
+		_.each(systems, function(system){
+			myNodes.push( {data: service.generateNodeData(1, system.instances[0], 90, -30)});
+		});
+		return myNodes;
+	};
+
+	service.getTemplateGraphOptions = function(myNodes, onLayoutStop) {
+		var result = {
+			layout: layoutsFactory.getArborTemplateLayout(undefined, onLayoutStop),
+			elements: { nodes: myNodes, edges: []},
+			style: cytoscape.stylesheet()
+				.selector('node').css({
+					'font-size': 11,
+					'font-weight': 'bold',
+					'shape': 'data(faveShape)',
+					'width': 'mapData(weight, 0, 100, 20, 60)',
+					'height': 'mapData(weight, 0, 100, 20, 60)',
+					'content': 'data(name)',
+					'text-valign': 'bottom',
+					'background-color': 'data(faveColor)',
+					'border-color': 'data(textColor)',
+					'border-width': 1,
+					'color': 'data(textColor)'
+				})
+		};
+		return result;
+	};
+
 
 	return service;
 }]);
