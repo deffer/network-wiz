@@ -4,8 +4,10 @@
 angular.module("layoutsFactory", []).factory("layoutsFactory", [function(){
 	var service = {};
 
-	service.getArborLayout = function(onReady, onStop){
+	service.getArborLayout = function(onReady, onStop, allFixed){
+		service.allFixed = allFixed;
 		return {
+
 			name: 'arbor',
 
 			liveUpdate: true, // whether to show the layout as it's running
@@ -19,13 +21,14 @@ angular.module("layoutsFactory", []).factory("layoutsFactory", [function(){
 			repulsion: 1000,
 			stiffness: 600,
 			friction: 0.5,
-			gravity: false,
+			gravity: true,
 			fps: 55,
 			precision: 200,
 
 			// static numbers or functions that dynamically return what these
 			// values should be for each element
-			nodeMass: function(data){
+			nodeMass:
+			function(data){
 				var map = {'1': 0.5, '2': 0.3, '3': 0.2, '4': 0.1};
 				return map[""+data.serviceLevel];
 			},
@@ -34,18 +37,21 @@ angular.module("layoutsFactory", []).factory("layoutsFactory", [function(){
 				return data.strength/100;
 			},*/
 
-			stepSize: 0.5, // size of timestep in simulation
+			stepSize: 1, // size of timestep in simulation
 
 			ready: onReady, // callback on layoutready
 			stop: onStop, // callback on layoutstop
 
-			// function that returns true if the system is stable to indicate
-			// that the layout can be stopped
-			stableEnergy: undefined
-			/*function (energy) {
+			// function that returns true if the system is stable to indicate that the layout can be stopped
+			stableEnergy:
+			function (energy) {
+				if (service.allFixed) {
+					//console.log("All fixed, nothing to do");
+					return true;
+				}
 				var e = energy;
 				return (e.max <= 0.5) || (e.mean <= 0.3);
-			}*/
+			}
 		}
 	};
 

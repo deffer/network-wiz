@@ -95,9 +95,10 @@
     <a ng-click="toggleLayer(0)" ng-class="{hasError: hasErrorsOnLayer[0]}">Summary</a>
     <a ng-repeat="i in servernames" ng-click="toggleLayer($index+1)" ng-class="{hasError: hasErrorsOnLayer[$index+1]}">{{servernames[$index]}}</a>
 </div>
-<div>
-    <label for="maincy">Bender</label>
-    <input type="checkbox" ng-model="maincy"/>
+<div class = "controls">
+    <div><label for="bender">Randomize</label><input id="bender" type="checkbox" ng-model="randomCoordinates"/></div>
+    <div><label for="locked">Locked</label><input id="locked" type="checkbox" ng-model="lockedNodes"/></div>
+    <button ng-click="dumpCoordinates()" style="display: block;">Dump coordinates</button>
 </div>
 
 <div id="cys" class="square-box1">

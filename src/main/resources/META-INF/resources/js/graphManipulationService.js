@@ -101,9 +101,14 @@ angular.module("graphManipulation", ["dataManipulation", "layoutsFactory"]).fact
 		}
 	};
 
-	service.getGraphOptions = function(myNodes, myEdges, onReadyFunc, onLayoutReadyFunc, onLayoutStop){
+
+	service.notifyLayout = function(allFixed){
+		layoutsFactory.allFixed = allFixed;
+	};
+
+	service.getGraphOptions = function(myNodes, myEdges, onReadyFunc, onLayoutReadyFunc, onLayoutStop, allFixed){
 		var result = {
-			layout: layoutsFactory.getArborLayout(onLayoutReadyFunc, onLayoutStop),
+			layout: layoutsFactory.getArborLayout(onLayoutReadyFunc, onLayoutStop, allFixed),
 			//layoutsFactory.getConcentricGraphLayout(onLayoutReadyFunc),
 			//layoutsFactory.getBFLayout(onLayoutReadyFunc),
 			//layoutsFactory.getCoSELayout(onLayoutReadyFunc, onLayoutStop),

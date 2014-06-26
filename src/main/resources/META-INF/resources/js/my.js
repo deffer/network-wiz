@@ -14,6 +14,9 @@ var nwizController = ["$scope", "datasource", "graphManipulationService", "dataM
 	$scope.maincy = true;
 	$scope.dialogShow = false;
 	$scope.layer = 0;
+	$scope.randomCoordinates = false;
+	$scope.lockedNodes = true;
+	$scope.cyReInitialized = true;
 
 	// data grouped by layers (servers). layer 0 is a summary layer
 	$scope.servernames = ['ormesbdev01', 'ormesbdev02', 'ormesbdev98', 'ormesbdev99'];
@@ -47,11 +50,41 @@ var nwizController = ["$scope", "datasource", "graphManipulationService", "dataM
 		// lock screen position of system nodes as per template values
 		whenTemplateReady.then(function(){
 			//$scope.updateNodePositionFromOtherCy($('#maincy').cytoscape('get'), myNodes);
-			$scope.makeCy(myNodes, myEdges);
+			var allFixed = false;
+			if (!$scope.randomCoordinates)
+				allFixed = $scope.updateNodePositionToFixedCoordinates(datasource.getFixedCoordinates(), myNodes);
+			$scope.makeCy(myNodes, myEdges, allFixed);
 		});
 
 
 	});
+
+	$scope.updateNodePositionToFixedCoordinates = function(coordsMap, nodes, realtime){
+		var allFixed = true;
+		_.each(nodes, function(node){
+			var name = realtime? node.data("id"): node.data.id;
+			var coordinates = coordsMap[name];
+			if (coordinates){
+				if (realtime){
+					node.locked(true);
+					node.position(coordinates);
+				}else{
+					node.locked = true;
+					node.position = {x: coordinates.x, y: coordinates.y};
+				}
+			}else{
+				allFixed = false;
+				console.log("Fixed coordinates for "+name+" aren't available");
+
+				if (realtime){
+					node.locked(false);
+				} else{
+					node.locked = false;
+				}
+			}
+		});
+		return allFixed;
+	};
 
 	$scope.updateNodePositionFromOtherCy = function(otherCy, nodes){
 		otherCy.nodes().each(function(i, node){
@@ -76,10 +109,23 @@ var nwizController = ["$scope", "datasource", "graphManipulationService", "dataM
 
 	};
 
-	$scope.makeCy = function(nodes, edges){
+	$scope.onCyStop = function(){
+		console.log("Rendering stopped");
+		if ($scope.cyReInitialized){
+			$scope.cyReInitialized = false;
+			$scope.refreshCurrentLayer();
+		}
+		if ($scope.lockedNodes){
+			$scope.cy.nodes().lock();
+		}else{
+			$scope.cy.nodes().unlock();
+		}
+	};
+
+	$scope.makeCy = function(nodes, edges, allFixed){
 
 		var cyEl = $('#maincy');
-		cyEl.cytoscape(gms.getGraphOptions(nodes, edges, $scope.onCyReady, undefined, $scope.refreshCurrentLayer));
+		cyEl.cytoscape(gms.getGraphOptions(nodes, edges, $scope.onCyReady, undefined, $scope.onCyStop, allFixed));
 		$scope.cy = cyEl.cytoscape('get');
 
 		$scope.refreshCurrentLayer();
@@ -151,10 +197,34 @@ var nwizController = ["$scope", "datasource", "graphManipulationService", "dataM
 
 	$scope.$watch('maincy', function(){
 		if ($scope.maincy){
-			if ($scope.cy) $scope.cy.forceRender();
+			if ($scope.cy) $scope.cy.layout();
 		}else{
 			var cy = $('#hiddency').cytoscape('get');
-			cy.reset(); cy.resize(); cy.forceRender(); // nothing works :(
+			cy.layout();
+		}
+	});
+
+	$scope.$watch('randomCoordinates', function(){
+		if ($scope.cy){
+			$scope.cy.nodes().unlock();  // to let us change coordinates programatically
+			if ($scope.randomCoordinates){
+				gms.notifyLayout(false);
+			}else{
+				var allFixed = $scope.updateNodePositionToFixedCoordinates(datasource.getFixedCoordinates(), $scope.cy.nodes(), true);
+				if (allFixed)
+					$scope.cy.forceRender(); // but we still want to call layout() to kick in onStop function
+				gms.notifyLayout(allFixed);
+			}
+			$scope.cy.layout();
+		}
+	});
+
+	$scope.$watch('lockedNodes', function(){
+		if (!$scope.cyReInitialized){
+			if ($scope.lockedNodes)
+				$scope.cy.nodes().lock();
+			else
+				$scope.cy.nodes().unlock();
 		}
 	});
 
@@ -164,5 +234,15 @@ var nwizController = ["$scope", "datasource", "graphManipulationService", "dataM
 			result.push(factory());
 		}
 		return result;
-	}
+	};
+
+	$scope.dumpCoordinates = function(){
+		var result = {};
+		$scope.cy.nodes().each(function(i, node){
+			result[node.data("id")] = node.position();
+		});
+
+		console.log(JSON.stringify(result));
+
+	};
 }];
