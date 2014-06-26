@@ -17,6 +17,7 @@ var nwizController = ["$scope", "datasource", "graphManipulationService", "dataM
 	$scope.randomCoordinates = false;
 	$scope.lockedNodes = true;
 	$scope.cyReInitialized = true;
+	$scope.suppressEvents = false;
 
 	// data grouped by layers (servers). layer 0 is a summary layer
 	$scope.servernames = ['ormesbdev01', 'ormesbdev02', 'ormesbdev98', 'ormesbdev99'];
@@ -86,31 +87,11 @@ var nwizController = ["$scope", "datasource", "graphManipulationService", "dataM
 		return allFixed;
 	};
 
-	$scope.updateNodePositionFromOtherCy = function(otherCy, nodes){
-		otherCy.nodes().each(function(i, node){
-			var x = node.position("x");
-			var y = node.position("y");
-			var systemName = node.data("name");
-			console.log(node);
-			console.log("For system "+systemName+" coordinates "+x+", "+y);
 
-			/*_.each(nodes, function(s){
-				if (s.data.id == systemName || s.data.id.indexOf(systemName+"-")==0){
-					s.locked = true;
-					s.position = {x: x, y: y};
-					s.data.x = x;
-					s.data.y = y;
-				}
-			});*/
-
-		});
-
-		/*node.position = {x: templateNode.position('x'), y: templateNode.position('y')};*/
-
-	};
-
-	$scope.onCyStop = function(){
+	$scope.onLayoutStop = function(){
 		console.log("Rendering stopped");
+		$scope.suppressEvents = false;
+		$scope.$apply();
 		if ($scope.cyReInitialized){
 			$scope.cyReInitialized = false;
 			$scope.refreshCurrentLayer();
@@ -124,13 +105,15 @@ var nwizController = ["$scope", "datasource", "graphManipulationService", "dataM
 
 	$scope.makeCy = function(nodes, edges, allFixed){
 
+		$scope.suppressEvents = true; // onLayoutStop will restore it
 		var cyEl = $('#maincy');
-		cyEl.cytoscape(gms.getGraphOptions(nodes, edges, $scope.onCyReady, undefined, $scope.onCyStop, allFixed));
+		cyEl.cytoscape(gms.getGraphOptions(nodes, edges, $scope.onCyReady, undefined, $scope.onLayoutStop, allFixed));
 		$scope.cy = cyEl.cytoscape('get');
 
-		$scope.refreshCurrentLayer();
-
 		$scope.cy.on('click', 'node', function(evt) {
+			if ($scope.suppressEvents)
+				return $scope.logSuppress("node click");
+
 			var nodes = this;
 			$scope.currentNode = nodes.data("customData");
 			$scope.dialogShow = true;
@@ -142,6 +125,9 @@ var nwizController = ["$scope", "datasource", "graphManipulationService", "dataM
 
 		$scope.cy.on('click', function(evt){
 			if (evt.cyTarget === $scope.cy){
+				if ($scope.suppressEvents)
+					return $scope.logSuppress("background click");
+
 				$scope.dialogShow = false;
 				$scope.$apply();
 			}
@@ -205,14 +191,16 @@ var nwizController = ["$scope", "datasource", "graphManipulationService", "dataM
 	});
 
 	$scope.$watch('randomCoordinates', function(){
-		if ($scope.cy){
+		if ($scope.cy && !$scope.cyReInitialized){
+			$scope.suppressEvents = true;
+
 			$scope.cy.nodes().unlock();  // to let us change coordinates programatically
 			if ($scope.randomCoordinates){
 				gms.notifyLayout(false);
 			}else{
 				var allFixed = $scope.updateNodePositionToFixedCoordinates(datasource.getFixedCoordinates(), $scope.cy.nodes(), true);
 				if (allFixed)
-					$scope.cy.forceRender(); // but we still want to call layout() to kick in onStop function
+					$scope.cy.forceRender(); // but we still want to call layout() to kick in onStop function and toggle suppressEvents
 				gms.notifyLayout(allFixed);
 			}
 			$scope.cy.layout();
@@ -245,4 +233,9 @@ var nwizController = ["$scope", "datasource", "graphManipulationService", "dataM
 		console.log(JSON.stringify(result));
 
 	};
+
+	$scope.logSuppress = function(evt){
+		console.log("Ignoring "+evt+" - Events are disabled");
+		return false;
+	}
 }];

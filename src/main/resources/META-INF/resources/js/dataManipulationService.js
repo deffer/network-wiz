@@ -260,10 +260,6 @@ angular.module("dataManipulation", []).factory("dataManipulationService", [funct
 
 	service.runChaosMonkey = function(system){
 		var nodes = system.instances;
-		if (system.name == "EPR"){
-			console.log("Cant touch me");
-			return;
-		}
 
 		_.each(nodes[2].entities, function(entity){
 			_.each(entity.applications, function(app){
@@ -275,6 +271,10 @@ angular.module("dataManipulation", []).factory("dataManipulationService", [funct
 		});
 
 
+		if (nodes[1].name == "EPR"){
+			console.log("Cant touch me");
+			return;
+		}
 		_.each(nodes[3].entities[0].applications, function(app){
 			app.status = 'stopped';
 		});

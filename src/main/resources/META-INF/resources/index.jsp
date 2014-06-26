@@ -72,6 +72,10 @@
         .layersNav a.hasError {
             color: red;
         }
+        .layersNav a.suppressEvents {
+            color: grey;
+        }
+
         .dialog .title {
             font-weight: bold;
         }
@@ -92,8 +96,10 @@
 <body ng-app="nwizApp" ng-controller="nwizController">
 
 <div class="layersNav">
-    <a ng-click="toggleLayer(0)" ng-class="{hasError: hasErrorsOnLayer[0]}">Summary</a>
-    <a ng-repeat="i in servernames" ng-click="toggleLayer($index+1)" ng-class="{hasError: hasErrorsOnLayer[$index+1]}">{{servernames[$index]}}</a>
+    <a ng-click="toggleLayer(0)" ng-enabled="!suppressEvents" ng-class="{hasError: hasErrorsOnLayer[0], disabled: suppressEvents}">Summary</a>
+    <a ng-repeat="i in servernames" ng-click="toggleLayer($index+1)" ng-enabled="!suppressEvents"
+       ng-class="{hasError: hasErrorsOnLayer[$index+1], disabled: suppressEvents}">{{servernames[$index]}}
+    </a>
 </div>
 <div class = "controls">
     <div><label for="bender">Randomize</label><input id="bender" type="checkbox" ng-model="randomCoordinates"/></div>
@@ -108,7 +114,8 @@
                 <span class="title">{{currentNode.name}}:</span>
                 <span>{{currentNode.status}}</span>
             </div>
-		    <span ng-show="currentNode.endpoint">{{currentNode.endpoint}}</span>
+            <span ng-show="currentNode.version">Version: {{currentNode.version}}</span>
+            <span ng-show="currentNode.endpoint">{{currentNode.endpoint}}</span>
 	    </div>
 
         <div id="maincy" class="cy" ng-show="maincy"> </div>
