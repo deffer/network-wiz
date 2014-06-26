@@ -10,36 +10,6 @@
         body {
             font: 14px helvetica neue, helvetica, arial, sans-serif;
         }
-        .square-box{
-            position: relative;
-            width: 50%;
-            overflow: hidden;
-            /*background: #4679BD;*/
-        }
-        .square-box:before{
-            content: "";
-            display: block;
-            padding-top: 50%;
-        }
-        .square-content{
-            position:  absolute;
-            top: 0;
-            left: 0;
-            bottom: 0;
-            right: 0;
-            color: white;
-        }
-        .square-content div {
-            display: table;
-            width: 100%;
-            height: 100%;
-        }
-        .square-content span {
-            display: table-cell;
-            text-align: center;
-            vertical-align: middle;
-            color: white
-        }
 
         .cy {
 	        /*margin-top: 100px;*/
@@ -55,7 +25,7 @@
         }
         .layersNav{
             margin-top: 300px;
-            width: 100px;
+            width: 120px;
         }
         .layersNav a {
             display: block;
@@ -63,18 +33,12 @@
             border: black solid 1px;
             border-top: none;
         }
-        .layersNav a:first-child {
-            border-top: black solid 1px;
-	        background-color: white;
-        }
-        .layersNav a:nth-child(even) {background-color: beige}
-        .layersNav a:nth-child(odd) {background-color: aliceblue}
-        .layersNav a.hasError {
-            color: red;
-        }
-        .layersNav a.suppressEvents {
-            color: grey;
-        }
+        .layersNav a:first-child {border-top: black solid 1px;}
+        .layersNav a:nth-child(even) {background-color: beige;}
+        .layersNav a:nth-child(odd) {background-color: aliceblue;}
+        .layersNav a.current {background-color: darkgrey;}
+        .layersNav a.hasError {color: red;}
+        .layersNav a.disabled {color: grey;}
 
         .dialog .title {
             font-weight: bold;
@@ -96,33 +60,44 @@
 <body ng-app="nwizApp" ng-controller="nwizController">
 
 <div class="layersNav">
-    <a ng-click="toggleLayer(0)" ng-enabled="!suppressEvents" ng-class="{hasError: hasErrorsOnLayer[0], disabled: suppressEvents}">Summary</a>
-    <a ng-repeat="i in servernames" ng-click="toggleLayer($index+1)" ng-enabled="!suppressEvents"
-       ng-class="{hasError: hasErrorsOnLayer[$index+1], disabled: suppressEvents}">{{servernames[$index]}}
+    <a ng-click="toggleLayer(0)" ng-disabled="suppressEvents" ng-class="{current: layer == 0 ,disabled: suppressEvents}">Summary
+        <span ng-show="hasErrorsOnLayer[0]" style="color: red;">*</span>
+    </a>
+    <a ng-repeat="i in servernames" ng-click="toggleLayer($index+1)" ng-disabled="suppressEvents"
+       ng-class="{current: layer == $index+1, disabled: suppressEvents}">
+        {{servernames[$index]}}
+        <span ng-show="hasErrorsOnLayer[$index+1]" style="color: red;">*</span>
     </a>
 </div>
+
+
 <div class = "controls">
-    <div><label for="bender">Randomize</label><input id="bender" type="checkbox" ng-model="randomCoordinates"/></div>
-    <div><label for="locked">Locked</label><input id="locked" type="checkbox" ng-model="lockedNodes"/></div>
+    <div><label for="bender">Randomize</label>
+        <input ng-disabled="suppressEvents" id="bender" type="checkbox" ng-model="randomCoordinates"/>
+    </div>
+    <div><label for="locked">Locked</label>
+        <input ng-disabled="suppressEvents" id="locked" type="checkbox" ng-model="lockedNodes"/>
+    </div>
     <button ng-click="dumpCoordinates()" style="display: block;">Dump coordinates</button>
 </div>
 
-<div id="cys" class="square-box1">
-    <div id="hcy" class='square-content1'>
-	    <div class="dialog" ng-show="dialogShow">
-            <div>
-                <span class="title">{{currentNode.name}}:</span>
-                <span>{{currentNode.status}}</span>
-            </div>
-            <span ng-show="currentNode.version">Version: {{currentNode.version}}</span>
-            <span ng-show="currentNode.endpoint">{{currentNode.endpoint}}</span>
-	    </div>
 
-        <div id="maincy" class="cy" ng-show="maincy"> </div>
-        <div id="hiddency" class="cy" ng-show="!maincy"> </div>
+<div id="hcy">
+    <div class="dialog" ng-show="dialogShow">
+        <div>
+            <span class="title">{{currentNode.name}}:</span>
+            <span>{{currentNode.status}}</span>
+        </div>
+        <span ng-show="currentNode.version">Version: {{currentNode.version}}</span>
+        <span ng-show="currentNode.endpoint">{{currentNode.endpoint}}</span>
+        <span ng-show="currentNode.context">Context: {{currentNode.endpoint}}</span>
+        <span ng-show="currentNode.topic">Topic: {{currentNode.endpoint}}</span>
     </div>
 
+    <div id="maincy" class="cy" ng-show="maincy"> </div>
+    <div id="hiddency" class="cy" ng-show="!maincy"> </div>
 </div>
+
 
 </body>
 
