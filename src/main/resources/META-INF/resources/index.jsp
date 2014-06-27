@@ -21,8 +21,20 @@
             left: 150px;
             top: 100px;
             background-color: lightgrey;
-
         }
+
+        div.divLegend{
+            margin-top: 100px;
+        }
+        .legendcy {
+            min-height: 250px;
+            max-height: 250px;
+            min-width: 140px;
+            max-width: 140px;
+            display: block;
+            border: black solid 1px;
+        }
+
         .layersNav{
             margin-top: 300px;
             width: 120px;
@@ -32,6 +44,7 @@
             padding: 5px;
             border: black solid 1px;
             border-top: none;
+            cursor: default;
         }
         .layersNav a:first-child {border-top: black solid 1px;}
         .layersNav a:nth-child(even) {background-color: beige;}
@@ -81,6 +94,11 @@
     <button ng-click="dumpCoordinates()" style="display: block;">Dump coordinates</button>
 </div>
 
+<div class="divLegend">
+    <label>Status</label>
+    <div id="legendcy" class="legendcy"></div>
+</div>
+
 
 <div id="hcy">
     <div class="dialog" ng-show="dialogShow">
@@ -88,10 +106,10 @@
             <span class="title">{{currentNode.name}}:</span>
             <span>{{currentNode.status}}</span>
         </div>
-        <span ng-show="currentNode.version">Version: {{currentNode.version}}</span>
-        <span ng-show="currentNode.endpoint">{{currentNode.endpoint}}</span>
-        <span ng-show="currentNode.context">Context: {{currentNode.endpoint}}</span>
-        <span ng-show="currentNode.topic">Topic: {{currentNode.endpoint}}</span>
+        <div><span ng-show="currentNode.version">Version: {{currentNode.version}}</span></div>
+        <div><span ng-show="currentNode.endpoint">{{currentNode.endpoint}}</span></div>
+        <div><span ng-show="currentNode.context">Context: {{currentNode.endpoint}}</span></div>
+        <div><span ng-show="currentNode.topic">Topic: {{currentNode.context}}</span></div>
     </div>
 
     <div id="maincy" class="cy" ng-show="maincy"> </div>

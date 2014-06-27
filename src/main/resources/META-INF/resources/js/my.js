@@ -38,7 +38,7 @@ var nwizController = ["$scope", "datasource", "graphManipulationService", "dataM
 		var whenTemplateReady = defer.promise;
 		defer.resolve(); // in case we want to wait for other layout to finish first
 
-		$('#maincy').cytoscape(gms.getTemplateGraphOptions(gms.generateTemplateGraph($scope.systems)/*, defer.resolve*/));
+		//$('#maincy').cytoscape(gms.getTemplateGraphOptions(gms.generateTemplateGraph($scope.systems)/*, defer.resolve*/));
 
 
 		// generate data for graph from summary layer (structure, names, initial colors reflecting statuses)
@@ -181,16 +181,7 @@ var nwizController = ["$scope", "datasource", "graphManipulationService", "dataM
 		$scope.dialogShow = false;
 	};
 
-	$scope.$watch('maincy', function(){
-		if ($scope.maincy){
-			if ($scope.cy) $scope.cy.layout();
-		}else{
-			var cy = $('#hiddency').cytoscape('get');
-			cy.layout();
-		}
-	});
-
-	$scope.$watch('randomCoordinates', function(){
+	$scope.onRandomFlagChange = function(){
 		if ($scope.cy && !$scope.cyReInitialized){
 			$scope.suppressEvents = true;
 
@@ -205,16 +196,32 @@ var nwizController = ["$scope", "datasource", "graphManipulationService", "dataM
 			}
 			$scope.cy.layout();
 		}
-	});
+	};
 
-	$scope.$watch('lockedNodes', function(){
+	$scope.onLockedFlagChange = function(){
 		if (!$scope.cyReInitialized){
 			if ($scope.lockedNodes)
 				$scope.cy.nodes().lock();
 			else
 				$scope.cy.nodes().unlock();
 		}
+	};
+
+	$scope.$watch('maincy', function(){
+		if ($scope.maincy){
+			if ($scope.cy) $scope.cy.layout();
+		}else{
+			var cy = $('#hiddency').cytoscape('get');
+			cy.layout();
+		}
 	});
+
+	$scope.$watch('randomCoordinates', $scope.onRandomFlagChange);
+	$scope.$watch('lockedNodes', $scope.onLockedFlagChange);
+
+	$scope.makeLegendCy = function(){
+		$("#legendcy").cytoscape(gms.getLegendGraphOptions());
+	};
 
 	$scope.getNObjects = function(n, factory){
 		var result = [];
@@ -231,11 +238,14 @@ var nwizController = ["$scope", "datasource", "graphManipulationService", "dataM
 		});
 
 		console.log(JSON.stringify(result));
-
 	};
 
 	$scope.logSuppress = function(evt){
 		console.log("Ignoring "+evt+" - Events are disabled");
 		return false;
-	}
+	};
+
+
+
+	$scope.makeLegendCy();
 }];

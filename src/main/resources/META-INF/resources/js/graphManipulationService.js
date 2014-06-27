@@ -8,7 +8,7 @@ angular.module("graphManipulation", ["dataManipulation", "layoutsFactory"]).fact
 	service.colorMap = {1: 'orange', 2: 'coral', 3: "olivedrab", 4: "cornflowerblue"};
 	service.textColorMap = {1: 'darkorange', 2: 'chocolate', 3: 'darkolivegreen', 4: 'dodgerblue'};
 	service.shapesMap = {1: 'ellipse', 2: 'roundrectangle', 3: 'roundrectangle', 4: 'ellipse'};
-	service.colorMapByStatus = {'stopped': 'red', 'not running':'darkgrey', 'warning': 'red', 'unavailable':'darkgrey'};
+	service.colorMapByStatus = {'stopped': 'red', 'not running':'red', 'warning': 'red', 'unavailable':'darkgrey'};
 
 	service.getColor = function (status, level, forText){
 		var color = service.colorMapByStatus[status];
@@ -27,7 +27,9 @@ angular.module("graphManipulation", ["dataManipulation", "layoutsFactory"]).fact
 			faveColor: service.getColor(status, level, false),
 			faveShape: service.shapesMap[level],
 			//faveShape: 'roundrectangle',
-			textColor: service.getColor(status, level, true)};
+			textColor: service.getColor(status, level, true),
+			status: status
+		};
 		return result;
 	};
 
@@ -102,8 +104,69 @@ angular.module("graphManipulation", ["dataManipulation", "layoutsFactory"]).fact
 	};
 
 
+	service.getLegendGraphOptions = function(){
+		var nodes = [];
+		var y = 0;
+		var source = [
+			service.generateNodeData(3,  {name: "down on some servers", status: "warning", id: "warning1"}, 25, 1),
+			service.generateNodeData(4, {name: "down on some servers", status: "warning", id: "warning2"}, 15, 1),
+			service.generateNodeData(3, {name: "down", status: "not running", id: "down"},25, 1),
+			service.generateNodeData(3, {name: "info unavailable", status: "unavailable", id: "unavailable"}, 25, 1)
+		];
+
+		_.each(source, function(s){
+			nodes.push( { data:s, locked: true, position: {x: 20, y: y}});
+			y = y + 60
+		});
+
+		var refreshFunction = function(cy){
+			cy.cy.nodes().each(function(i, cyNode){
+				var sourceNode = _.find(source, function(n){return n.id == cyNode.data("id")});
+				console.log("Refreshing status indicator");
+				console.log(cyNode);
+				service.refreshStatusIndication(sourceNode, cyNode);
+			});
+		};
+
+		var result = {
+			layout: layoutsFactory.getPresetLayout(nodes, refreshFunction),
+			style: cytoscape.stylesheet()
+				.selector('node') .css(service.arborNodeCss)
+				.selector('.highlighted').css(service.arborNodeHighlightedCss),
+			zoomEnabled: true, // to fit graph to the viewport
+			userZoomingEnabled: false,
+			elements: {
+				nodes: nodes,
+				edges: []
+			}
+		};
+
+		return result;
+
+	};
+
 	service.notifyLayout = function(allFixed){
 		layoutsFactory.allFixed = allFixed;
+	};
+
+	service.arborNodeCss = {
+			'font-size': 11,
+			'font-weight': 'bold',
+			'shape': 'data(faveShape)',
+			'width': 'mapData(weight, 0, 100, 10, 60)',
+			'height': 'mapData(weight, 0, 100, 10, 60)',
+			'content': 'data(name)',
+			'text-valign': 'bottom',
+			'background-color': 'data(faveColor)',
+			'border-color': 'data(textColor)',
+			'border-width': 1,
+			'color': 'data(textColor)'
+	};
+	service.arborNodeHighlightedCss = {
+		'background-color': 'darkred',
+		'color': 'darkred',
+		'transition-property': 'background-color, color',
+		'transition-duration': '0.5s'
 	};
 
 	service.getGraphOptions = function(myNodes, myEdges, onReadyFunc, onLayoutReadyFunc, onLayoutStop, allFixed){
@@ -115,26 +178,8 @@ angular.module("graphManipulation", ["dataManipulation", "layoutsFactory"]).fact
 
 
 			style: cytoscape.stylesheet()
-				.selector('node')
-				.css({
-                    'font-size': 11,
-					'font-weight': 'bold',
-					'shape': 'data(faveShape)',
-					'width': 'mapData(weight, 0, 100, 10, 60)',
-					'height': 'mapData(weight, 0, 100, 10, 60)',
-					'content': 'data(name)',
-					'text-valign': 'bottom',
-					'background-color': 'data(faveColor)',
-					'border-color': 'data(textColor)',
-					'border-width': 1,
-					'color': 'data(textColor)'
-				})
-				.selector('.highlighted').css({
-					'background-color': 'darkred',
-					'color': 'darkred',
-					'transition-property': 'background-color, color',
-					'transition-duration': '0.5s'
-				})
+				.selector('node') .css(service.arborNodeCss)
+				.selector('.highlighted').css(service.arborNodeHighlightedCss)
 				.selector(':selected').css({
 					'border-width': 2,
 					'border-color': '#333'
@@ -180,20 +225,7 @@ angular.module("graphManipulation", ["dataManipulation", "layoutsFactory"]).fact
 		var result = {
 			layout: layoutsFactory.getArborTemplateLayout(undefined, onLayoutStop),
 			elements: { nodes: myNodes, edges: []},
-			style: cytoscape.stylesheet()
-				.selector('node').css({
-					'font-size': 11,
-					'font-weight': 'bold',
-					'shape': 'data(faveShape)',
-					'width': 'mapData(weight, 0, 100, 20, 60)',
-					'height': 'mapData(weight, 0, 100, 20, 60)',
-					'content': 'data(name)',
-					'text-valign': 'bottom',
-					'background-color': 'data(faveColor)',
-					'border-color': 'data(textColor)',
-					'border-width': 1,
-					'color': 'data(textColor)'
-				})
+			style: cytoscape.stylesheet().selector('node').css(service.arborNodeCss)
 		};
 		return result;
 	};

@@ -272,7 +272,7 @@ angular.module("dataManipulation", []).factory("dataManipulationService", [funct
 
 
 		if (nodes[1].name == "EPR"){
-			console.log("Cant touch me");
+			console.log("Cant touch me.   I'm EPR.");
 			return;
 		}
 		_.each(nodes[3].entities[0].applications, function(app){

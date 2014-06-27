@@ -55,6 +55,25 @@ angular.module("layoutsFactory", []).factory("layoutsFactory", [function(){
 		}
 	};
 
+	service.getPresetLayout = function(nodes, onStop){
+		return {
+			name: 'preset',
+
+			fit: true, // whether to fit to viewport
+			ready: undefined, // callback on layoutready
+			stop: onStop,
+
+			positions: //undefined, // map of (node id) => (position obj)
+				_.reduce(nodes, function(memo, node){
+					memo[node.data.id] = node.position;
+					return memo;
+				}, {}),
+			zoom: undefined, // the zoom level to set (prob want fit = false if set)
+			pan: undefined, // the pan level to set (prob want fit = false if set)
+			padding: 5 // padding on fit
+		};
+	};
+
 	service.getArborTemplateLayout = function(onReady, onStop){
 		return {
 			name: 'arbor',
