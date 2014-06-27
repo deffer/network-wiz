@@ -108,8 +108,8 @@
         </div>
         <div><span ng-show="currentNode.version">Version: {{currentNode.version}}</span></div>
         <div><span ng-show="currentNode.endpoint">{{currentNode.endpoint}}</span></div>
-        <div><span ng-show="currentNode.context">Context: {{currentNode.endpoint}}</span></div>
-        <div><span ng-show="currentNode.topic">Topic: {{currentNode.context}}</span></div>
+        <div><span ng-show="currentNode.context">Context: {{currentNode.context}}</span></div>
+        <div><span ng-show="currentNode.topic">Topic: {{currentNode.topic}}</span></div>
     </div>
 
     <div id="maincy" class="cy" ng-show="maincy"> </div>
