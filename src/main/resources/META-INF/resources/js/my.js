@@ -38,7 +38,7 @@ var nwizController = ["$scope", "datasource", "graphManipulationService", "dataM
 		var whenTemplateReady = defer.promise;
 		defer.resolve(); // in case we want to wait for other layout to finish first
 
-		//$('#maincy').cytoscape(gms.getTemplateGraphOptions(gms.generateTemplateGraph($scope.systems)/*, defer.resolve*/));
+		//$('#tempcy').cytoscape(gms.getTemplateGraphOptions(gms.generateTemplateGraph($scope.systems)/*, defer.resolve*/));
 
 
 		// generate data for graph from summary layer (structure, names, initial colors reflecting statuses)
@@ -50,11 +50,17 @@ var nwizController = ["$scope", "datasource", "graphManipulationService", "dataM
 
 		// lock screen position of system nodes as per template values
 		whenTemplateReady.then(function(){
-			//$scope.updateNodePositionFromOtherCy($('#maincy').cytoscape('get'), myNodes);
 			var allFixed = false;
 			if (!$scope.randomCoordinates)
 				allFixed = $scope.updateNodePositionToFixedCoordinates(datasource.getFixedCoordinates(), myNodes);
-			$scope.makeCy(myNodes, myEdges, allFixed);
+
+			if (!allFixed){
+				var x = datasource.getFixedMostRightCoord();
+				var newSimulationBounds = [x, 0, $('#maincy').width(), $('#maincy').height()];
+				$scope.makeCy(myNodes, myEdges, allFixed, newSimulationBounds);
+			}else
+				$scope.makeCy(myNodes, myEdges, allFixed);
+
 		});
 
 
@@ -103,11 +109,14 @@ var nwizController = ["$scope", "datasource", "graphManipulationService", "dataM
 		}
 	};
 
-	$scope.makeCy = function(nodes, edges, allFixed){
+	$scope.makeCy = function(nodes, edges, allFixed, newSimulationBounds){
 
 		$scope.suppressEvents = true; // onLayoutStop will restore it
 		var cyEl = $('#maincy');
-		cyEl.cytoscape(gms.getGraphOptions(nodes, edges, $scope.onCyReady, undefined, $scope.onLayoutStop, allFixed));
+		var options = gms.getGraphOptions(nodes, edges, $scope.onCyReady, undefined, $scope.onLayoutStop, allFixed);
+		if (newSimulationBounds)
+			options.layout.simulationBounds = newSimulationBounds;
+		cyEl.cytoscape(options); // <----------------------
 		$scope.cy = cyEl.cytoscape('get');
 
 		$scope.cy.on('click', 'node', function(evt) {
