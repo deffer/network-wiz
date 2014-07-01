@@ -67,18 +67,18 @@ var nwizController = ["$scope", "datasource", "graphManipulationService", "dataM
 			var coordinates = coordsMap[name];
 			if (coordinates){
 				if (realtime){
-					node.locked(true);
 					node.position(coordinates);
+					node.lock();
 				}else{
-					node.locked = true;
 					node.position = {x: coordinates.x, y: coordinates.y};
+					node.locked = true;
 				}
 			}else{
 				allFixed = false;
 				console.log("Fixed coordinates for "+name+" aren't available");
 
 				if (realtime){
-					node.locked(false);
+					node.unlock()
 				} else{
 					node.locked = false;
 				}
@@ -188,13 +188,16 @@ var nwizController = ["$scope", "datasource", "graphManipulationService", "dataM
 			$scope.cy.nodes().unlock();  // to let us change coordinates programatically
 			if ($scope.randomCoordinates){
 				gms.notifyLayout(false);
+				$scope.cy.layout();
 			}else{
 				var allFixed = $scope.updateNodePositionToFixedCoordinates(datasource.getFixedCoordinates(), $scope.cy.nodes(), true);
+				gms.notifyLayout(allFixed);
 				if (allFixed)
 					$scope.cy.forceRender(); // but we still want to call layout() to kick in onStop function and toggle suppressEvents
-				gms.notifyLayout(allFixed);
+
+				$scope.cy.layout();
 			}
-			$scope.cy.layout();
+
 		}
 	};
 
