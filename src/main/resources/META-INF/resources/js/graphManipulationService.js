@@ -169,9 +169,14 @@ angular.module("graphManipulation", ["dataManipulation", "layoutsFactory"]).fact
 		'transition-duration': '0.5s'
 	};
 
+	service.getArborLayout = function(onLayoutReadyFunc, onLayoutStop, allFixed){
+		return layoutsFactory.getArborLayout(onLayoutReadyFunc, onLayoutStop, allFixed);
+	};
+
 	service.getGraphOptions = function(myNodes, myEdges, onReadyFunc, onLayoutReadyFunc, onLayoutStop, allFixed){
 		var result = {
-			layout: layoutsFactory.getArborLayout(onLayoutReadyFunc, onLayoutStop, allFixed),
+			layout: service.getArborLayout(onLayoutReadyFunc, onLayoutStop, allFixed),
+			//layoutsFactory.getArborLayout(onLayoutReadyFunc, onLayoutStop, allFixed),
 			//layoutsFactory.getConcentricGraphLayout(onLayoutReadyFunc),
 			//layoutsFactory.getBFLayout(onLayoutReadyFunc),
 			//layoutsFactory.getCoSELayout(onLayoutReadyFunc, onLayoutStop),

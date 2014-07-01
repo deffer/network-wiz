@@ -5,7 +5,6 @@ angular.module("layoutsFactory", []).factory("layoutsFactory", [function(){
 	var service = {};
 
 	service.getArborLayout = function(onReady, onStop, allFixed){
-		service.allFixed = allFixed;
 		return {
 
 			name: 'arbor',
@@ -43,15 +42,13 @@ angular.module("layoutsFactory", []).factory("layoutsFactory", [function(){
 			stop: onStop, // callback on layoutstop
 
 			// function that returns true if the system is stable to indicate that the layout can be stopped
-			stableEnergy:
-			function (energy) {
-				if (service.allFixed) {
-					//console.log("All fixed, nothing to do");
-					return true;
+			stableEnergy: allFixed?
+				function() {return true}
+				:
+				function (energy) {
+					var e = energy;
+					return (e.max <= 0.5) || (e.mean <= 0.3);
 				}
-				var e = energy;
-				return (e.max <= 0.5) || (e.mean <= 0.3);
-			}
 		}
 	};
 

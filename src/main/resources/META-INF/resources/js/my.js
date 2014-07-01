@@ -187,15 +187,22 @@ var nwizController = ["$scope", "datasource", "graphManipulationService", "dataM
 
 			$scope.cy.nodes().unlock();  // to let us change coordinates programatically
 			if ($scope.randomCoordinates){
-				gms.notifyLayout(false);
-				$scope.cy.layout();
+				$scope.cy.layout(gms.getArborLayout(undefined, $scope.onLayoutStop, false));
 			}else{
 				var allFixed = $scope.updateNodePositionToFixedCoordinates(datasource.getFixedCoordinates(), $scope.cy.nodes(), true);
-				gms.notifyLayout(allFixed);
-				if (allFixed)
-					$scope.cy.forceRender(); // but we still want to call layout() to kick in onStop function and toggle suppressEvents
+				var newOptions = gms.getArborLayout(undefined, $scope.onLayoutStop, allFixed);
+				newOptions.simulationBounds = undefined;
 
-				$scope.cy.layout();
+				if (allFixed){
+					$scope.cy.forceRender(); // but we still want to call layout() to kick in onStop function and toggle suppressEvents
+				} else {
+					// change simulationBounds
+					var x = datasource.getFixedMostRightCoord();
+					var newSimulationBounds = [x, 0, $scope.cy.container().clientWidth, $scope.cy.container().clientHeight];
+					console.log(newSimulationBounds);
+					newOptions.simulationBounds = newSimulationBounds;
+				}
+				$scope.cy.layout(newOptions);
 			}
 
 		}
