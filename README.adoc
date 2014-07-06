@@ -1,2 +1,2 @@
-= Network Viz example for Blaz
+= Integration weathermap prototype
 
