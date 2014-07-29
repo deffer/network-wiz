@@ -3,8 +3,18 @@
 <html>
 <head>
 	<title>A website</title>
-    <jawr:script src="/bundles/thirdparty-libs.js"/>
-    <jawr:script src="/bundles/core-libs.js"/>
+    <script src="libs/jquery.min.js"></script>
+    <script src="libs/angular.min.js"></script>
+    <script src="libs/underscore-min.js"></script>
+    <script src="libs/arbor.js"></script>
+    <script src="libs/cytoscape.js"></script>
+
+    <script src="js/my.js"></script>
+    <script src="js/myDataSource.js"></script>
+    <script src="js/graphManipulationService.js"></script>
+    <script src="js/dataManipulationService.js"></script>
+    <script src="js/layoutsFactory.js"></script>
+
     <meta charset=utf-8 />
     <style type="text/css">
         body {
@@ -110,6 +120,7 @@
         <div><span ng-show="currentNode.endpoint">{{currentNode.endpoint}}</span></div>
         <div><span ng-show="currentNode.context">Context: {{currentNode.context}}</span></div>
         <div><span ng-show="currentNode.topic">Topic: {{currentNode.topic}}</span></div>
+        <div><span ng-show="currentNode.logs">Logs: <a href="{{currentNode.logs}}" target="_blank">open</a></span></div>
     </div>
 
     <div id="maincy" class="cy" ng-show="maincy"> </div>
