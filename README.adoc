@@ -1,2 +1,7 @@
 = Integration weathermap prototype
 
+== Notes
+To optimise with installed node.js
+
+ node tools/r.js -o tools/build.js
+
