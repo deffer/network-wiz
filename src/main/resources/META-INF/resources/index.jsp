@@ -3,8 +3,22 @@
 <head>
 	<title>A website</title>
 
-    <script data-main="../main" src="libs/require.js"></script>
+    <script data-main="main.js" src="libs/require.js"></script>
 
+
+    <!--
+    <script src="libs/jquery.min.js"></script>
+    <script src="libs/angular.min.js"></script>
+    <script src="libs/underscore-min.js"></script>
+    <script src="libs/arbor.js"></script>
+    <script src="libs/cytoscape.js"></script>
+
+    <script src="js/my.js"></script>
+    <script src="js/myDataSource.js"></script>
+    <script src="js/graphManipulationService.js"></script>
+    <script src="js/dataManipulationService.js"></script>
+    <script src="js/layoutsFactory.js"></script>
+    -->
     <meta charset=utf-8 />
     <style type="text/css">
         body {
@@ -70,7 +84,7 @@
 
 </head>
 
-<body ng-app="nwizApp" ng-controller="nwizController">
+<body ng-controller="nwizController">
 
 <div class="layersNav">
     <a ng-click="toggleLayer(0)" ng-disabled="suppressEvents" ng-class="{current: layer == 0 ,disabled: suppressEvents}">Summary
