@@ -2,17 +2,8 @@
 <html>
 <head>
 	<title>A website</title>
-    <script src="libs/jquery.min.js"></script>
-    <script src="libs/angular.min.js"></script>
-    <script src="libs/underscore-min.js"></script>
-    <script src="libs/arbor.js"></script>
-    <script src="libs/cytoscape.js"></script>
 
-    <script src="js/my.js"></script>
-    <script src="js/myDataSource.js"></script>
-    <script src="js/graphManipulationService.js"></script>
-    <script src="js/dataManipulationService.js"></script>
-    <script src="js/layoutsFactory.js"></script>
+    <script data-main="../main" src="libs/require.js"></script>
 
     <meta charset=utf-8 />
     <style type="text/css">
