@@ -1,4 +1,3 @@
-<%@ taglib uri="http://jawr.net/tags" prefix="jawr" %>
 <!DOCTYPE html>
 <html>
 <head>

@@ -18,44 +18,21 @@
 		  <groupId>com.bluetrainsoftware.composite</groupId>
 		  <artifactId>composite-groovy</artifactId>
 		  <version>[1,2)</version>
+		  <scope>test</scope>
 	  </dependency>
 	  <dependency>
 		  <groupId>com.bluetrainsoftware.bathe.initializers</groupId>
 		  <artifactId>system-property-loader</artifactId>
 		  <version>[1,2)</version>
+		  <scope>test</scope>
 	  </dependency>
 
-	  <dependency>
-		  <groupId>nz.ac.auckland.groupapps.lmz</groupId>
-		  <artifactId>lmz-jawr</artifactId>
-		  <version>[1,2)</version>
-	  </dependency>
 	  <dependency>
 		  <groupId>nz.ac.auckland.groupapps.common</groupId>
 		  <artifactId>runnable-war</artifactId>
 		  <version>[1,2)</version>
+		  <scope>test</scope>
 	  </dependency>
-
-	  <!-- there are a few of these, so you *really* want to abstract them away -->
-	  <dependency>
-		  <groupId>org.webjars</groupId>
-		  <artifactId>jquery</artifactId>
-		  <version>1.9.1</version>
-	  </dependency>
-
-	  <dependency>
-		  <groupId>org.webjars</groupId>
-		  <artifactId>angularjs</artifactId>
-		  <version>1.2.16</version>
-	  </dependency>
-
-	  <dependency>
-		  <groupId>org.webjars</groupId>
-		  <artifactId>underscorejs</artifactId>
-		  <version>1.6.0</version>
-	  </dependency>
-
-
 
 	  <!-- this is to allow us to use tests -->
 	  <dependency>
