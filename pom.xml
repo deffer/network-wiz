@@ -1,72 +1,51 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <parent>
-    <groupId>com.bluetrainsoftware.parent</groupId>
-    <artifactId>java-parent</artifactId>
-    <version>1.1</version>
-  </parent>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>com.bluetrainsoftware.parent</groupId>
+		<artifactId>java-parent</artifactId>
+		<version>1.1</version>
+	</parent>
 
-  <groupId>com.bluetrainsoftware.networkviz</groupId>
-  <artifactId>network-viz</artifactId>
-  <version>1.1-SNAPSHOT</version>
-  <packaging>bathe-war</packaging>
-  <name>network-viz</name>
+	<groupId>com.bluetrainsoftware.networkviz</groupId>
+	<artifactId>network-viz</artifactId>
+	<version>1.1-SNAPSHOT</version>
+	<packaging>bathe-war</packaging>
+	<name>network-viz</name>
 
 
-  <dependencies>
-	  <dependency>
-		  <groupId>com.bluetrainsoftware.composite</groupId>
-		  <artifactId>composite-groovy</artifactId>
-		  <version>[1,2)</version>
-		  <scope>test</scope>
-	  </dependency>
-	  <dependency>
-		  <groupId>com.bluetrainsoftware.bathe.initializers</groupId>
-		  <artifactId>system-property-loader</artifactId>
-		  <version>[1,2)</version>
-		  <scope>test</scope>
-	  </dependency>
+	<dependencies>
+		<dependency>
+			<groupId>com.bluetrainsoftware.composite</groupId>
+			<artifactId>composite-groovy</artifactId>
+			<version>[1,2)</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.bluetrainsoftware.bathe.initializers</groupId>
+			<artifactId>system-property-loader</artifactId>
+			<version>[1,2)</version>
+			<scope>test</scope>
+		</dependency>
 
-	  <dependency>
-		  <groupId>nz.ac.auckland.groupapps.common</groupId>
-		  <artifactId>runnable-war</artifactId>
-		  <version>[1,2)</version>
-		  <scope>test</scope>
-	  </dependency>
+		<dependency>
+			<groupId>nz.ac.auckland.groupapps.common</groupId>
+			<artifactId>runnable-war</artifactId>
+			<version>[1,2)</version>
+			<scope>test</scope>
+		</dependency>
 
-	  <!-- this is to allow us to use tests -->
-	  <dependency>
-		  <groupId>com.bluetrainsoftware.composite</groupId>
-		  <artifactId>composite-unit-test</artifactId>
-		  <version>[1,2)</version>
-		  <scope>test</scope>
-	  </dependency>
-  </dependencies>
+		<!-- this is to allow us to use tests -->
+		<dependency>
+			<groupId>com.bluetrainsoftware.composite</groupId>
+			<artifactId>composite-unit-test</artifactId>
+			<version>[1,2)</version>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
 
 	<build>
 		<plugins>
-			<!-- this would normally be in your functional parent to enforce jsp compilation (if you use it) -->
-			<plugin>
-				<groupId>org.eclipse.jetty</groupId>
-				<artifactId>jetty-jspc-maven-plugin</artifactId>
-				<version>9.0.2.v20130417</version>
-				<executions>
-					<execution>
-						<id>war-compile-jsp</id>
-						<goals>
-							<goal>jspc</goal>
-						</goals>
-						<phase>compile</phase>
-						<configuration>
-							<!-- it can't derive them otherwise, and this seems to be what it gives them -->
-							<packageRoot>org.apache.jsp</packageRoot>
-							<webAppSourceDirectory>
-								${project.basedir}/src/main/resources/META-INF/resources
-							</webAppSourceDirectory>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
 
 			<plugin>
 				<groupId>com.bluetrainsoftware.maven</groupId>
@@ -76,7 +55,9 @@
 				<configuration>
 					<jumpClass>nz.ac.auckland.war.WebAppRunner</jumpClass>
 					<!-- these arguments get passed to the BatheBooter -->
-					<booterArguments>-Dlogback.configurationFile=src/test/resources/logback-test.xml -Pclasspath:/war.properties</booterArguments>
+					<booterArguments>-Dlogback.configurationFile=src/test/resources/logback-test.xml
+						-Pclasspath:/war.properties
+					</booterArguments>
 				</configuration>
 			</plugin>
 		</plugins>
