@@ -5,3 +5,10 @@ To optimise with installed node.js
 
  node tools/r.js -o tools/build.js
 
+To optimise using Rhino (doesn't work yet)
+
+ java -cp c:/Users/iben883/.m2/repository/org/mozilla/rhino/1.7R4/rhino-1.7R4.jar org.mozilla.javascript.tools.shell.Main tools/r.js -o tools/build.js
+
+To optimise using maven exec:java calling Rhino
+
+ mvn exec:java -Dexec.includeProjectDependencies=false -Dexec.includePluginDependencies=true -Dexec.mainClass="org.mozilla.javascript.tools.shell.Main" -Dexec.args="tools/r.js tools/build.js"
