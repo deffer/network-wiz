@@ -1,18 +1,18 @@
 = Integration weathermap prototype
 
-== Optimisation Notes
+== Developer Notes
 
-To minify and combine javascript files the require.js optimisation need to be done. The result of optimisation
-is a target/resources-build folder, with index.html, require.js and main.js (the rest is not needed anymore)
+Assuming that node.js is installed
 
-To optimise with installed node.js
+=== Setting up
 
- node tools/r.js -o tools/build.js
+Install grunt-cli
 
-To optimise using Rhino (doesn't work)
+ npm install -g grunt-cli
 
- java -cp c:/Users/iben883/.m2/repository/org/mozilla/rhino/1.7R4/rhino-1.7R4.jar org.mozilla.javascript.tools.shell.Main tools/r.js -o tools/build.js
+Install dependencies (listed in package.json)
+ npm install
 
-To optimise using maven exec:java calling Rhino (doesn't work)
+=== Building
 
- mvn exec:java -Dexec.includeProjectDependencies=false -Dexec.includePluginDependencies=true -Dexec.mainClass="org.mozilla.javascript.tools.shell.Main" -Dexec.args="tools/r.js -o tools/build.js"
+ grunt build
