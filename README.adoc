@@ -2,18 +2,33 @@
 
 == Developer Notes
 
-Assuming that node.js is installed
+Source files are in +scripts+ filder. To build a project run
+
+ grunt build
+
+This will create output files in the +dist+ folder.
+
+If you never worked with http://nodejs.org[Node], refer to <<Setting up>> section for instructions.
 
 === Setting up
+
+Install http://nodejs.org[Node]
 
 Install grunt-cli
 
  npm install -g grunt-cli
 
-Install dependencies (listed in package.json)
+Install dependencies (listed in +package.json+)
 
  npm install
 
-=== Building
+=== Building process description
 
- grunt build
+Three tasks are run during building.
+
+useminPrepare::
+Analyzes source +index.html+ and concatenates references js files into output folder. Using https://github.com/yeoman/grunt-usemin[grunt-usemin]
+copy::
+Copying source +index.html+ into output folder.
+usemin::
+Replaces scripts in the output +index.html+ with their concatenated versions.
