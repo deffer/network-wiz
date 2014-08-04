@@ -2,25 +2,25 @@
 <html>
 <head>
 	<title>A website</title>
-
-    <script data-main="main.js" src="require.js"></script>
-
-
-    <!--
+	<!-- build:js third-party.js -->
     <script src="libs/jquery.min.js"></script>
     <script src="libs/angular.min.js"></script>
     <script src="libs/underscore-min.js"></script>
     <script src="libs/arbor.js"></script>
     <script src="libs/cytoscape.js"></script>
-
+	<!-- endbuild -->
+	
+	<!-- build:js app.js -->
     <script src="js/my.js"></script>
     <script src="js/myDataSource.js"></script>
     <script src="js/graphManipulationService.js"></script>
     <script src="js/dataManipulationService.js"></script>
     <script src="js/layoutsFactory.js"></script>
-    -->
+	<!-- endbuild -->
+	
     <meta charset=utf-8 />
     <style type="text/css">
+	
         body {
             font: 14px helvetica neue, helvetica, arial, sans-serif;
         }
@@ -84,7 +84,7 @@
 
 </head>
 
-<body ng-controller="nwizController">
+<body ng-app="nwizApp" ng-controller="nwizController">
 
 <div class="layersNav">
     <a ng-click="toggleLayer(0)" ng-disabled="suppressEvents" ng-class="{current: layer == 0 ,disabled: suppressEvents}">Summary
