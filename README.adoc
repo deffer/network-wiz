@@ -11,6 +11,7 @@ Install grunt-cli
  npm install -g grunt-cli
 
 Install dependencies (listed in package.json)
+
  npm install
 
 === Building

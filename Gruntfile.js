@@ -20,8 +20,15 @@ module.exports = function (grunt) {
 			}
 		},
 
+		copy: {
+			html: {
+				src: 'scripts/index.html',
+				dest: 'dist/index.html'
+			}
+		},
+
 		usemin: {
-			html: 'scripts/index.html',
+			html: 'dist/index.html',
 			options: {
 				assetsDirs: ['dist']
 			}
@@ -30,10 +37,12 @@ module.exports = function (grunt) {
 
 	grunt.loadNpmTasks('grunt-usemin');
 	grunt.loadNpmTasks('grunt-contrib-concat');
+	grunt.loadNpmTasks('grunt-contrib-copy');
 
 	grunt.registerTask('build', [
 		'useminPrepare',
 		'concat:generated',
+		'copy:html',
 		'usemin'
 	]);
 
