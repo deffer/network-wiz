@@ -2,6 +2,7 @@
 <html>
 <head>
 	<title>A website</title>
+
 	<!-- build:js third-party.js -->
     <script src="libs/jquery.min.js"></script>
     <script src="libs/angular.min.js"></script>
@@ -9,12 +10,15 @@
     <script src="libs/arbor.js"></script>
     <script src="libs/cytoscape.js"></script>
 	<!-- endbuild -->
-	
+
+	<script src="config.js"></script>
+
 	<!-- build:js app.js -->
-    <script src="js/my.js"></script>
-    <script src="js/myDataSource.js"></script>
-    <script src="js/graphManipulationService.js"></script>
-    <script src="js/dataManipulationService.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/dataSource.js"></script>
+    <script src="js/mockData.js"></script>
+    <script src="js/graphManipulation.js"></script>
+    <script src="js/dataManipulation.js"></script>
     <script src="js/layoutsFactory.js"></script>
 	<!-- endbuild -->
 	
@@ -33,7 +37,7 @@
             width: 90%;
             position: absolute;
             left: 150px;
-            top: 100px;
+            top: 30px; /* affects coordinates of popup dialog (on click) in main.js */
             background-color: lightgrey;
         }
 
@@ -50,7 +54,7 @@
         }
 
         .layersNav{
-            margin-top: 300px;
+            margin-top: 230px;
             width: 120px;
         }
         .layersNav a {

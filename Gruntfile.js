@@ -24,6 +24,10 @@ module.exports = function (grunt) {
 			html: {
 				src: 'scripts/index.html',
 				dest: 'dist/index.html'
+			},
+			configjs: {
+				src: 'scripts/config.js',
+				dest: 'dist/config.js'
 			}
 		},
 
@@ -43,6 +47,7 @@ module.exports = function (grunt) {
 		'useminPrepare',
 		'concat:generated',
 		'copy:html',
+		'copy:configjs',
 		'usemin'
 	]);
 

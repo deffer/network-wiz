@@ -29,6 +29,6 @@ Three tasks are run during building:
 useminPrepare::
 Analyzes source +index.html+ and concatenates referenced js files into output folder. Using https://github.com/yeoman/grunt-usemin[grunt-usemin]
 copy::
-Copying source +index.html+ into output folder.
+Copying source +index.html+ and config.js into output folder.
 usemin::
 Replaces scripts in the output +index.html+ with their concatenated versions. Using https://github.com/yeoman/grunt-usemin[grunt-usemin]

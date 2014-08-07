@@ -6,9 +6,10 @@
    // if we need something here
 })(this.jQuery);
 
-angular.module("nwizApp", ["datasource", "graphManipulation", "dataManipulation"]);
+angular.module("nwizApp", ["datasource", "graphManipulation", "dataManipulation", "configuration", "mockdataModule"]);
 
-var nwizController = ["$scope", "datasource", "graphManipulationService", "dataManipulationService", "$q",function($scope, datasource, gms, dms, $q){
+var nwizController = ["$scope", "datasource", "graphManipulationService", "dataManipulationService", "$q", "CONFIG_SERVERS", "mockdata",
+	function($scope, datasource, gms, dms, $q, CONFIG_SERVERS, mockdata){
 
 	// flags
 	$scope.maincy = true;
@@ -20,7 +21,7 @@ var nwizController = ["$scope", "datasource", "graphManipulationService", "dataM
 	$scope.suppressEvents = false;
 
 	// data grouped by layers (servers). layer 0 is a summary layer
-	$scope.servernames = ['ormesbdev01', 'ormesbdev02', 'ormesbdev98', 'ormesbdev99'];
+	$scope.servernames = CONFIG_SERVERS;  // ['ormesbdev01', 'ormesbdev02', 'ormesbdev98', 'ormesbdev99'];
 	$scope.hasErrorsOnLayer = _.sample([false], $scope.servernames.length+1);
 	$scope.elementsCache = []; // elementsCache[1].EPR-identity  -> identity node on server ormesbdev02
 
@@ -126,8 +127,8 @@ var nwizController = ["$scope", "datasource", "graphManipulationService", "dataM
 			var nodes = this;
 			$scope.currentNode = nodes.data("customData");
 			$scope.dialogShow = true;
-			$(".dialog").css("left", evt.cyRenderedPosition.x+150); // canvas starts ar 150,100
-			$(".dialog").css("top", evt.cyRenderedPosition.y+100);
+			$(".dialog").css("left", evt.cyRenderedPosition.x + 150); // canvas starts ar 150,30
+			$(".dialog").css("top", evt.cyRenderedPosition.y + 30);
 			console.log(nodes);
 			$scope.$apply();
 		});
@@ -147,8 +148,8 @@ var nwizController = ["$scope", "datasource", "graphManipulationService", "dataM
 		console.log("Updating nodes");
 		$scope.systems = dms.groupSystemsByName(systemsByServer);
 
-		dms.addMockDataToReport(datasource.getOtherSystemNodes(), $scope.systems);
-		dms.addMockDataToReport(datasource.getAnotherSystemNodes(), $scope.systems);
+		dms.addMockDataToReport(mockdata.getOtherSystemNodes(), $scope.systems);
+		dms.addMockDataToReport(mockdata.getAnotherSystemNodes(), $scope.systems);
 
 		console.log("All systems clear");
 		console.log($scope.systems);

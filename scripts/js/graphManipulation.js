@@ -181,7 +181,8 @@ angular.module("graphManipulation", ["dataManipulation", "layoutsFactory"]).fact
 			//layoutsFactory.getBFLayout(onLayoutReadyFunc),
 			//layoutsFactory.getCoSELayout(onLayoutReadyFunc, onLayoutStop),
 
-
+			userPanningEnabled: true,
+			panningEnabled:true,
 			style: cytoscape.stylesheet()
 				.selector('node') .css(service.arborNodeCss)
 				.selector('.highlighted').css(service.arborNodeHighlightedCss)
