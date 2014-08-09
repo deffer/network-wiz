@@ -19,6 +19,7 @@ var nwizController = ["$scope", "datasource", "graphManipulationService", "dataM
 	$scope.lockedNodes = true;
 	$scope.cyReInitialized = true;
 	$scope.suppressEvents = false;
+	$scope.connectionError = false;
 
 	// data grouped by layers (servers). layer 0 is a summary layer
 	$scope.servernames = CONFIG_SERVERS;  // ['ormesbdev01', 'ormesbdev02', 'ormesbdev98', 'ormesbdev99'];
@@ -29,7 +30,14 @@ var nwizController = ["$scope", "datasource", "graphManipulationService", "dataM
 	$scope.systems = null; // systems.EPR.instances[2] -> EPR in server ormesbdev98
 
 
-	datasource.loadNodes().then(function (systemsByServer) {
+	datasource.loadNodes().then(
+		function (systemsByServer) {$scope.load(systemsByServer, false)},
+		function (systemsByServer) {$scope.load([], true)}
+	);
+
+	$scope.load = function(systemsByServer, error){
+		console.log("Promises finished with error: "+error);
+		$scope.connectionError = error;
 
 		// regroup data, generate summary layer, update error statuses, generate elements cache
 		$scope.prepareData(systemsByServer);
@@ -40,7 +48,6 @@ var nwizController = ["$scope", "datasource", "graphManipulationService", "dataM
 		defer.resolve(); // in case we want to wait for other layout to finish first
 
 		//$('#tempcy').cytoscape(gms.getTemplateGraphOptions(gms.generateTemplateGraph($scope.systems)/*, defer.resolve*/));
-
 
 		// generate data for graph from summary layer (structure, names, initial colors reflecting statuses)
 		var myNodes = [];
@@ -65,7 +72,7 @@ var nwizController = ["$scope", "datasource", "graphManipulationService", "dataM
 		});
 
 
-	});
+	};
 
 	$scope.updateNodePositionToFixedCoordinates = function(coordsMap, nodes, realtime){
 		var allFixed = true;

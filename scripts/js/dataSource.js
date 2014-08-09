@@ -28,16 +28,19 @@ angular.module("datasource", ['configuration']).factory("datasource",
 
 		var deferResult = $q.defer();
 		var promiseResult = deferResult.promise;
-		$q.all(promises).then(function(){
-			deferResult.resolve(servers);
-		});
+		$q.all(promises).then(
+			function(){
+				deferResult.resolve(servers);
+			}, function(){
+			    deferResult.reject(servers);
+			});
 		return promiseResult;
 	};
 
 	service.getSuccessFunc = function(index, servers, defer){
 		return function(data, status, headers, config){
 			if (_.isUndefined(data) || _.isEmpty(data) || _.isNull(data) || data == 'null') {
-				console.log("Empty response. IGNORE for "+index);
+				console.log("Empty response from "+serverNames[index]);
 				servers[index] = [{}];
 			}else{
 				servers[index] = data._source.systems;
@@ -48,9 +51,10 @@ angular.module("datasource", ['configuration']).factory("datasource",
 
 	service.getErrorFunc = function(index, servers, defer){
 		return function(data, status, headers, config){
-			console.log("Error from server. IGNORE for "+index);
+			var message = "Unable to load data from server "+serverNames[index]+ ". Rejecting promise.";
+			console.log(message);
 			servers[index] = [{}];
-			defer.reject();
+			defer.reject(message);
 		}
 	};
 

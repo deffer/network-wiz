@@ -54,7 +54,7 @@
         }
 
         .layersNav{
-            margin-top: 230px;
+            margin-top: 200px;
             width: 120px;
         }
         .layersNav a {
@@ -89,6 +89,8 @@
 </head>
 
 <body ng-app="nwizApp" ng-controller="nwizController">
+
+<span ng-show="connectionError" style="color: red;">Unable to connect to server. Using mock up.</span>
 
 <div class="layersNav">
     <a ng-click="toggleLayer(0)" ng-disabled="suppressEvents" ng-class="{current: layer == 0 ,disabled: suppressEvents}">Summary

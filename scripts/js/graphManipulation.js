@@ -120,10 +120,10 @@ angular.module("graphManipulation", ["dataManipulation", "layoutsFactory"]).fact
 		});
 
 		var refreshFunction = function(cy){
+			console.log("Refreshing status indicator");
 			cy.cy.nodes().each(function(i, cyNode){
 				var sourceNode = _.find(source, function(n){return n.id == cyNode.data("id")});
-				console.log("Refreshing status indicator");
-				console.log(cyNode);
+				//console.log(cyNode);
 				service.refreshStatusIndication(sourceNode, cyNode);
 			});
 		};
