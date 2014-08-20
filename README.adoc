@@ -32,3 +32,12 @@ copy::
 Copying source +index.html+ and config.js into output folder.
 usemin::
 Replaces scripts in the output +index.html+ with their concatenated versions. Using https://github.com/yeoman/grunt-usemin[grunt-usemin]
+
+=== Important ===
+
+Since arbor js performs some automatic path finding (to locate itself as javascript file), there is number of restrictions:
+
+* arbor.js cannot be combined with other javascript files (so dont use any concat)
+* arbor.js should be called exactly +arbor.js+ (without version)
+* arbor.js should be in the folder, otherwise its path becomes "/" and url is broken
+* no other javascript files should have +arbor+ in their name
